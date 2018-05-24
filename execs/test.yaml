@@ -1,0 +1,22 @@
+metadata:
+  name: Montjoie tests
+  format: "Lava-Test-Shell Test Definition 1.0"
+  description: "Montjoie test"
+  version: 1.0
+run:
+    steps:
+      - echo "Network tests"
+      - chmod +x scripts/network.sh
+      - ./scripts/network.sh
+      - echo "USB tests"
+      - chmod +x ./usb.sh
+      - ./usb.sh
+      - echo "RTC tests"
+      - chmod +x ./rtc.sh
+      - ./rtc.sh
+      - echo "PCI tests"
+      - chmod +x ./pci.sh
+      - ./pci.sh
+      - echo "NFS tests"
+      - chmod +x ./nfs.sh
+      - ./nfs.sh

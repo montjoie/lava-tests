@@ -1,0 +1,18 @@
+result() {
+	result=$1
+	shift
+	if [ "$result" == 'SKIP' ];then
+		echo "<LAVA_SIGNAL_TESTCASE $* RESULT=SKIP>"
+		return
+	fi
+	if [ $result -eq 127 ];then
+		echo "<LAVA_SIGNAL_TESTCASE $* RESULT=SKIP>"
+		return
+	fi
+	if [ $result -eq 0 ];then
+		echo "<LAVA_SIGNAL_TESTCASE $* RESULT=PASS>"
+	else
+		echo "<LAVA_SIGNAL_TESTCASE $* RESULT=FAIL>"
+	fi
+}
+
