@@ -2,17 +2,21 @@ result() {
 	result=$1
 	shift
 	if [ "$result" == 'SKIP' ];then
-		echo "<LAVA_SIGNAL_TESTCASE $* RESULT=SKIP>"
+		#echo "<LAVA_SIGNAL_TESTCASE $* RESULT=SKIP>"
+		lava-test-case $* --result SKIP
 		return
 	fi
 	if [ $result -eq 127 ];then
-		echo "<LAVA_SIGNAL_TESTCASE $* RESULT=SKIP>"
+		#echo "<LAVA_SIGNAL_TESTCASE $* RESULT=SKIP>"
+		lava-test-case $* --result SKIp
 		return
 	fi
 	if [ $result -eq 0 ];then
-		echo "<LAVA_SIGNAL_TESTCASE $* RESULT=PASS>"
+		#echo "<LAVA_SIGNAL_TESTCASE $* RESULT=PASS>"
+		lava-test-case $* --result PASS
 	else
-		echo "<LAVA_SIGNAL_TESTCASE $* RESULT=FAIL>"
+		#echo "<LAVA_SIGNAL_TESTCASE $* RESULT=FAIL>"
+		lava-test-case $* --result FAIL
 	fi
 }
 

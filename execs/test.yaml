@@ -20,3 +20,8 @@ run:
       - echo "NFS tests"
       - chmod +x ./nfs.sh
       - ./nfs.sh
+      - echo "LUKS tests"
+      - lava-test-set start test-luks
+      - chmod +x ./luks.sh
+      - ./luks.sh
+      - lava-test-set stop
