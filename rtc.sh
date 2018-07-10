@@ -3,11 +3,11 @@
 . ./common
 
 date
-result $? "TEST_CASE_ID=date"
+result $? "date"
 
 hwclock
-result $? "TEST_CASE_ID=hwclock"
+result $? "hwclock"
 
 dmesg |grep rtc
-result 0 "TEST_CASE_ID=dmesg-rtc"
+result 0 "dmesg-rtc"
 

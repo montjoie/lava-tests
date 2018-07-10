@@ -5,9 +5,12 @@ metadata:
   version: 1.0
 run:
     steps:
+      - echo "Misc tests"
+      - chmod +x ./misc.sh
+      - ./misc.sh
       - echo "Network tests"
-      - chmod +x scripts/network.sh
-      - ./scripts/network.sh
+      - chmod +x ./network.sh
+      - ./network.sh
       - echo "USB tests"
       - chmod +x ./usb.sh
       - ./usb.sh

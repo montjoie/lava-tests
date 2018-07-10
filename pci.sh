@@ -3,9 +3,9 @@
 . ./common
 
 if [ ! -e /sys/bus/pci ];then
-	result SKIP "TEST_CASE_ID=pci"
+	result SKIP "pci"
 	exit 0
 fi
 
 lspci
-result $? "TEST_CASE_ID=lspci"
+result $? "lspci"

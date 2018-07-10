@@ -3,4 +3,4 @@
 . ./common
 
 lsusb
-result $? "TEST_CASE_ID=lsusb"
+result $? "lsusb"
