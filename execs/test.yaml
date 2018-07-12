@@ -28,3 +28,8 @@ run:
       - chmod +x ./luks.sh
       - ./luks.sh
       - lava-test-set stop
+      - echo "modules tests"
+      - lava-test-set start test-modules
+      - chmod +x ./modules.sh
+      - ./modules.sh
+      - lava-test-set stop
