@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. common
+. ./common
 
 MODULES_LIST=/tmp/modules.list
 MODULES_RM=/tmp/modules.rm

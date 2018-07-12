@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. common
+. ./common
 
 ip a
 result $? "ip"
