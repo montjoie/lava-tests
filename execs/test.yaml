@@ -11,6 +11,11 @@ run:
       - echo "Network tests"
       - chmod +x ./network.sh
       - ./network.sh
+      - echo "IPSEC tests"
+      - lava-test-set start test-ipsec
+      - chmod +x ./ipsec.sh
+      - ./ipsec.sh
+      - lava-test-set stop
       - echo "USB tests"
       - chmod +x ./usb.sh
       - ./usb.sh
@@ -27,6 +32,11 @@ run:
       - lava-test-set start test-luks
       - chmod +x ./luks.sh
       - ./luks.sh
+      - lava-test-set stop
+      - echo "MMC tests"
+      - lava-test-set start test-mmc
+      - chmod +x ./mmc.sh
+      - ./mmc.sh
       - lava-test-set stop
       - echo "modules tests"
       - lava-test-set start test-modules
