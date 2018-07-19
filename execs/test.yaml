@@ -11,6 +11,11 @@ run:
       - echo "Network tests"
       - chmod +x ./network.sh
       - ./network.sh
+      - echo "Wifi tests"
+      - lava-test-set start test-wifi
+      - chmod +x ./wifi.sh
+      - ./wifi.sh
+      - lava-test-set stop
       - echo "IPSEC tests"
       - lava-test-set start test-ipsec
       - chmod +x ./ipsec.sh
