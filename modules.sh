@@ -15,12 +15,13 @@ try_remove() {
 		do
 			echo "DEBUG: try $module"
 			rmmod $module
-			if [ $? -eq 0 ];then
+			RET=$?
+			if [ $RET -eq 0 ];then
 				echo "$module" >> $MODULES_RM
 				result 0 "rmmod-$module"
 			else
 				#result 1 "rmmod-$module"
-				echo "DEBUG: fail to remove $module"
+				echo "DEBUG: fail to remove $module (ret=$RET)"
 			fi
 		done < $MODULES_LIST
 		return 1
