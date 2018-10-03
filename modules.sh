@@ -9,7 +9,7 @@ FINAL_CODE=0
 > $MODULES_RM
 
 try_remove() {
-	sort -k3 /proc/modules | cut -d' ' -f1 > $MODULES_LIST
+	sort -k3 /proc/modules | grep -v meson_dw_hdmi | cut -d' ' -f1 > $MODULES_LIST
 	if [ -s "$MODULES_LIST" ];then
 		while read module
 		do
@@ -17,7 +17,9 @@ try_remove() {
 			rmmod $module
 			if [ $? -eq 0 ];then
 				echo "$module" >> $MODULES_RM
+				result 0 "rmmod-$module"
 			else
+				#result 1 "rmmod-$module"
 				echo "DEBUG: fail to remove $module"
 			fi
 		done < $MODULES_LIST
@@ -42,8 +44,10 @@ do
 	if [ $? -ne 0 ];then
 		echo "FAIL: $module"
 		FINAL_CODE=1
+		result 1 "modprobe-$module"
 	else
-		echo "DEBUG: modprobe $module ok"
+		result 0 "modprobe-$module"
+		#echo "DEBUG: modprobe $module ok"
 	fi
 done < $MODULES_RM
 
