@@ -20,3 +20,11 @@ result() {
 	fi
 }
 
+# return 0 if an IPv4 address is set
+is_network_v4_ok() {
+	ip a | grep -v 'inet[[:space:]]127' | grep -v 'inet6' | grep 'inet[[:space:]]'
+	if [ $? -eq 0 ];then
+		return 0
+	fi
+	return 1
+}
