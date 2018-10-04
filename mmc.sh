@@ -12,7 +12,7 @@ fdisk -l |grep ^/ | cut -d' ' -f1 > /tmp/mmclist
 if [ -s /tmp/mmclist ];then
 	while read tdev
 	do
-		echo "TEST: dd $tdev"
+		start_test "Read $tdev via dd"
 		dd if=$tdev of=/dev/null bs=1M count=50
 		result $? "mmc-dd-$tdev"
 	done < /tmp/mmclist

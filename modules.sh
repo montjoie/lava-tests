@@ -9,10 +9,11 @@ FINAL_CODE=0
 > $MODULES_RM
 
 try_remove() {
-	sort -k3 /proc/modules | grep -v meson_dw_hdmi | cut -d' ' -f1 > $MODULES_LIST
+	sort -k3 /proc/modules | grep -vf modules.remove.blacklist | cut -d' ' -f1 > $MODULES_LIST
 	if [ -s "$MODULES_LIST" ];then
 		while read module
 		do
+			start_test "Rmmod $module"
 			echo "DEBUG: try $module"
 			rmmod $module
 			RET=$?
@@ -30,6 +31,19 @@ try_remove() {
 	fi
 }
 
+start_test "Load all modules"
+#modprobe all
+find /lib/modules -type f |grep kernel/ | sed 's,.*/,,' |
+while read module
+do
+	echo "DEBUG: Load $module"
+	#start_test "Load $module"
+	modprobe $module
+	#result $? "wifi-load-$wifi_module"
+done
+result 0 "test-module-load-all"
+
+
 for i in $(seq 1 10)
 do
 	try_remove
@@ -40,6 +54,7 @@ done
 
 while read module
 do
+	start_test "Modprobe $module"
 	echo "DEBUG: modprobe $module"
 	modprobe $module
 	if [ $? -ne 0 ];then

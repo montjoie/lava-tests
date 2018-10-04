@@ -1,0 +1,28 @@
+metadata:
+  name: Montjoie tests
+  format: "Lava-Test-Shell Test Definition 1.0"
+  description: "Montjoie test"
+  version: 1.0
+run:
+    steps:
+      - sleep 10
+      - echo "Network tests"
+      - lava-test-set start test-network
+      - chmod +x ./network.sh
+      - ./network.sh
+      - lava-test-set stop test-network
+      - echo "Wifi tests"
+      - lava-test-set start test-wifi
+      - chmod +x ./wifi.sh
+      - ./wifi.sh
+      - lava-test-set stop test-wifi
+      - echo "IPSEC tests"
+      - lava-test-set start test-ipsec
+      - chmod +x ./ipsec.sh
+      - ./ipsec.sh
+      - lava-test-set stop test-ipsec
+      - echo "NFS tests"
+      - lava-test-set start test-NFS
+      - chmod +x ./nfs.sh
+      - ./nfs.sh
+      - lava-test-set stop test-NFS

@@ -6,10 +6,12 @@
 find /lib/modules -type f |grep kernel/drivers/usb | sed 's,.*/,,' |
 while read usbmodule
 do
-	echo "DEBUG: module load $usbmodule"
+	#echo "DEBUG: module load $usbmodule"
+	start_test "Load $usbmodule"
 	modprobe $usbmodule
-	result $? "usbload-$usbmodule"
+	result $? "usb-load-$usbmodule"
 done
 
+start_test "Run lsusb"
 lsusb
-result $? "lsusb"
+result $? "usb-lsusb"

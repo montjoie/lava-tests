@@ -2,12 +2,15 @@
 
 . ./common
 
+start_test "Run date"
 date
-result $? "date"
+result $? "RTC-date"
 
+start_test "Run hwclock"
 hwclock
-result $? "hwclock"
+result $? "RTC-hwclock"
 
-dmesg |grep rtc
-result 0 "dmesg-rtc"
+start_test "Check dmesg logs"
+dmesg |grep -i rtc
+result 0 "rtc-dmesg"
 

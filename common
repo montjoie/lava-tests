@@ -1,6 +1,41 @@
+OUTPUT_DIR=/tmp/output
+TEST_PREFIX=""
+
+mkdir -p $OUTPUT_DIR
+
+start_test()
+{
+	echo "=============================================="
+	if [ ! -z "$1" ];then
+		echo "$1"
+	fi
+	echo "=============================================="
+	date +%s > $OUTPUT_DIR/timestamp.test.start
+	dmesg > $OUTPUT_DIR/dmesg.test.start
+}
+
 result() {
+	SLEEP=2
 	result=$1
 	shift
+
+	case $1 in
+	--sleep)
+		shift
+		SLEEP=$1
+		shift
+	;;
+	esac
+	# sleep to let dmesg output flushing
+	sleep $SLEEP
+	date +%s > $OUTPUT_DIR/timestamp.test.result
+	dmesg > $OUTPUT_DIR/dmesg.test.result
+	TSTAMP_START=$(cat $OUTPUT_DIR/timestamp.test.start)
+	TSTAMP_RESULT=$(cat $OUTPUT_DIR/timestamp.test.result)
+	TSTAMP_DIFF=$(($TSTAMP_RESULT-$TSTAMP_START))
+	echo "============================================== TIME=$TSTAMP_DIFF"
+	diff -u $OUTPUT_DIR/dmesg.test.start $OUTPUT_DIR/dmesg.test.result
+	echo "=============================================="
 	if [ "$result" == 'SKIP' ];then
 		#echo "<LAVA_SIGNAL_TESTCASE $* RESULT=SKIP>"
 		lava-test-case $* --result SKIP
@@ -8,7 +43,7 @@ result() {
 	fi
 	if [ $result -eq 127 ];then
 		#echo "<LAVA_SIGNAL_TESTCASE $* RESULT=SKIP>"
-		lava-test-case $* --result SKIp
+		lava-test-case $* --result SKIP
 		return
 	fi
 	if [ $result -eq 0 ];then
@@ -27,4 +62,13 @@ is_network_v4_ok() {
 		return 0
 	fi
 	return 1
+}
+
+get_machine_model() {
+	cat /sys/firmware/devicetree/base/compatible | tr '\0' '\n' > $OUTPUT_DIR/devicetree
+	dmesg | grep 'Machine model:' | sed 's,.*:[[:space:]],,' > $OUTPUT_DIR/machinemodel
+	if [ ! -s $OUTPUT_DIR/machinemodel ];then
+		echo "unknow" > $OUTPUT_DIR/machinemodel
+	fi
+	MACHINE_MODEL=$(cat $OUTPUT_DIR/machinemodel)
 }

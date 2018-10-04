@@ -1,0 +1,56 @@
+metadata:
+  name: Montjoie tests
+  format: "Lava-Test-Shell Test Definition 1.0"
+  description: "Montjoie test"
+  version: 1.0
+run:
+    steps:
+      - chmod +x ./start.sh
+      - ./start.sh
+      - echo "USB tests"
+      - lava-test-set start test-USB
+      - chmod +x ./usb.sh
+      - ./usb.sh
+      - lava-test-set stop test-USB
+      - echo "RTC tests"
+      - lava-test-set start test-RTC
+      - chmod +x ./rtc.sh
+      - ./rtc.sh
+      - lava-test-set stop test-RTC
+      - echo "PCI tests"
+      - lava-test-set start test-PCI
+      - chmod +x ./pci.sh
+      - ./pci.sh
+      - lava-test-set stop test-PCI
+      - echo "LUKS tests"
+      - lava-test-set start test-luks
+      - chmod +x ./luks.sh
+      - ./luks.sh
+      - lava-test-set stop test-luks
+      - echo "MMC tests"
+      - lava-test-set start test-mmc
+      - chmod +x ./mmc.sh
+      - ./mmc.sh
+      - lava-test-set stop test-mmc
+      - echo "Audio tests"
+      - lava-test-set start test-audio
+      - chmod +x ./audio.sh
+      - ./audio.sh
+      - lava-test-set stop test-audio
+      - echo "Video tests"
+      - lava-test-set start test-video
+      - chmod +x ./video.sh
+      - ./video.sh
+      - lava-test-set stop test-video
+      - echo "I2C tests"
+      - lava-test-set start test-i2c
+      - chmod +x ./i2c.sh
+      - ./i2c.sh
+      - lava-test-set stop test-i2c
+      - echo "Sensors tests"
+      - lava-test-set start test-sensors
+      - chmod +x ./sensors.sh
+      - ./sensors.sh
+      - lava-test-set stop test-sensors
+      - chmod +x ./final.sh
+      - ./final.sh
