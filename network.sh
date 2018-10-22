@@ -24,6 +24,14 @@ start_test "Run ip route"
 ip route
 result $? "ip-route"
 
+start_test "Test external network"
+ping -c4 8.8.8.8
+result $? "external-network"
+
+start_test "Test DNS"
+ping -c4 dynamic.baylibre.com
+result $? "dns"
+
 # test an ethtool command
 # arg1: return code for not supported (see ethtool code source)
 # arg2: summary of the command
@@ -90,6 +98,24 @@ test_interface() {
 
 }
 
+# compare current ethtool output with a reference one
+compare_ethtool() {
+	/usr/sbin/ethtool eth0 > $OUTPUT_DIR/ethtool.raw
+	RET=$?
+	if [ $RET -ne 0 ];then
+		echo "DEBUG: Should not fail"
+		return $RET
+	fi
+	wget http://kernel.montjoie.ovh/reference/${MACHINE_MODEL_}.ethtool
+	RET=$?
+	if [ $RET -ne 0 ];then
+		echo "DEBUG: Cannot get reference ethtool for ${MACHINE_MODEL_}"
+		return $RET
+	fi
+	diff -u $OUTPUT_DIR/ethtool.raw ${MACHINE_MODEL_}.ethtool
+	echo "DEBUG: diff $?"
+}
+
 for iface in $(ls /sys/class/net/)
 do
 	echo "DEBUG: Found $iface"
@@ -104,8 +130,12 @@ if [ $? -eq 0 ];then
 	HAVE_ETHTOOL=1
 fi
 
-/usr/sbin/ethtool eth0
-result $? test-ethtool
+if [ $HAVE_ETHTOOL -eq 1 ];then
+	/usr/sbin/ethtool eth0
+	result $? test-ethtool
+
+	compare_ethtool
+fi
 
 start_test "Detect mii-tool"
 /sbin/mii-tool eth0
@@ -115,7 +145,7 @@ start_test "Detect an iperf server"
 ping -c4 iperf.lava.local
 is_network_v4_ok
 if [ $? -eq 0 ];then
-	#/usr/bin/iperf3 -c 192.168.1.100
+	/usr/bin/iperf3 -c iperf.lava.local
 	result SKIP "iperf"
 else
 	result SKIP "iperf"
@@ -139,18 +169,56 @@ if [ $HAVE_ETHTOOL -eq 1 -a $NBD_ROOT -eq 0 ];then
 	if [ "$CURRENT_DUPLEX" = 'Half' ];then
 		CURRENT_DUPLEX='half'
 	fi
-
 	echo "DEBUG: Detected $CURRENT_SPEED $CURRENT_DUPLEX"
-	ethtool $INTERFACE |grep -o [0-9][0-9]*baseT/[A-Za-z]* | sort | uniq |
+
+	ethtool $INTERFACE | sed 's,Half[[:space:]]*,half\n,g' | sed 's,Full[[:space:]]*,full\n,g' | sed 's,10[0-9]*base,\n&,' |grep -v '^[[:space:]]*$' > $OUTPUT_DIR/ethtool.${INTERFACE}.out
+	READMODE=""
+	while read line
+	do
+		echo $line | grep -q 'Supported link modes'
+		if [ $? -eq 0 ] ;then
+			echo "DEBUG: begin supported"
+			READMODE='SUPPORTED'
+			continue
+		fi
+		echo $line | grep -q 'Link partner advertised link modes'
+		if [ $? -eq 0 ] ;then
+			echo "DEBUG: begin parnter"
+			READMODE='PARTNER'
+			continue
+		fi
+		echo "$line" |grep -q '^[0-9]'
+		if [ $? -ne 0 ] ;then
+			READMODE=''
+			continue
+		fi
+		case $READMODE in
+		'SUPPORTED')
+			echo "DEBUG: Found supported $line"
+			echo "$line" >> $OUTPUT_DIR/ethtool.mode.supported
+		;;
+		'PARTNER')
+			echo "DEBUG: Found partner $line"
+			echo "$line" >> $OUTPUT_DIR/ethtool.mode.partner
+		;;
+		*)
+			echo "DEBUG: Ignore $line"
+		;;
+		esac
+	done < $OUTPUT_DIR/ethtool.${INTERFACE}.out
+
 	while read ethmode
 	do
 		DUPLEX=$(echo $ethmode | cut -d'/' -f2)
 		SPEED=$(echo $ethmode | grep -o '^[0-9][0-9]*')
-		if [ "$DUPLEX" = 'Full' ];then
-			DUPLEX='full'
-		fi
-		if [ "$DUPLEX" = 'Half' ];then
-			DUPLEX='half'
+		# check that partner support it
+		if [ -s $OUTPUT_DIR/ethtool.mode.partner ];then
+			grep -q $ethmode $OUTPUT_DIR/ethtool.mode.partner
+			if [ $? -ne 0 ];then
+				result SKIP "network-$netdev-link-$ethmode"
+				continue
+			fi
+
 		fi
 		echo "DEBUG: TEST $SPEED $DUPLEX"
 		kci_netdev_ethtool_test 666 "change-speed-to-$ethmode" "ethtool -s $netdev speed $SPEED duplex $DUPLEX" "$netdev"
@@ -163,8 +231,8 @@ if [ $HAVE_ETHTOOL -eq 1 -a $NBD_ROOT -eq 0 ];then
 		else
 			result 0 "network-$netdev-link-$ethmode"
 		fi
-	done
-	#go back to maximum
+	done < $OUTPUT_DIR/ethtool.mode.supported
+	#go back to current mode
 	kci_netdev_ethtool_test 666 "change-speed-to-$ethmode" "ethtool -s $netdev speed $CURRENT_SPEED duplex $CURRENT_DUPLEX" "$netdev"
 
 fi
