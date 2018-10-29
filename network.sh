@@ -29,7 +29,7 @@ ping -c4 8.8.8.8
 result $? "external-network"
 
 start_test "Test DNS"
-ping -c4 dynamic.baylibre.com
+ping -c4 storage.kernelci.org
 result $? "dns"
 
 # test an ethtool command
