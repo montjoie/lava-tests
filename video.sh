@@ -16,6 +16,17 @@ test_dev_video() {
 	result $? "test-v4l-dump-$1"
 }
 
+#try to load all USB modules
+find /lib/modules -type f |grep -E 'media|video' | sed 's,.*/,,' |
+while read video_module
+do
+	start_test "Load module $video_module"
+	modprobe $video_module
+	result $? "video-load-$video_module"
+done
+
+
+
 DO_DRM_TEST=1
 
 get_machine_model
