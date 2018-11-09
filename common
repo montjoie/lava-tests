@@ -7,6 +7,13 @@ else
 fi
 mkdir -p $OUTPUT_DIR
 
+if [ -e /rootfs.version ];then
+	echo "=============================================="
+	cat /rootfs.version
+	echo "=============================================="
+	rm /rootfs.version
+fi
+
 start_test()
 {
 	echo "=============================================="
