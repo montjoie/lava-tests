@@ -3,14 +3,18 @@
 . ./common
 
 check_loglevel() {
-	dmesg --level $loglevel |grep -v 'module is from the staging directory' > $OUTPUT_DIR/dmesg.${loglevel}
+	dmesg --level $loglevel > $OUTPUT_DIR/dmesg.${loglevel}
 	if [ $? -ne 0 ];then
 		echo "ERROR: dmesg for $loglevel"
 		return 1
 	fi
 	if [ -s $OUTPUT_DIR/dmesg.${loglevel} ];then
-		cat $OUTPUT_DIR/dmesg.${loglevel}
-		return 2
+		echo "DEBUG: Got something from ${loglevel}"
+		grep -vE 'urandom_read: [0-9]* callbacks suppressed|module is from the staging directory' $OUTPUT_DIR/dmesg.${loglevel} > $OUTPUT_DIR/dmesg.${loglevel}.filter
+		if [ -s $OUTPUT_DIR/dmesg.${loglevel}.filter ];then
+			cat $OUTPUT_DIR/dmesg.${loglevel}.filter
+			return 2
+		fi
 	fi
 	return 0
 }
