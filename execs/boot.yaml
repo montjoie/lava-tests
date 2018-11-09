@@ -1,0 +1,12 @@
+metadata:
+  name: Montjoie tests
+  format: "Lava-Test-Shell Test Definition 1.0"
+  description: "Montjoie test"
+  version: 1.0
+run:
+    steps:
+      - echo "Boot tests"
+      - lava-test-set start test-boot
+      - chmod +x ./boot.sh
+      - ./boot.sh
+      - lava-test-set stop test-boot

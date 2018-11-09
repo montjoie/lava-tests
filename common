@@ -14,12 +14,13 @@ start_test()
 		echo "$1"
 	fi
 	echo "=============================================="
+	dmesg --console-off
 	date +%s > $OUTPUT_DIR/timestamp.test.start
 	dmesg > $OUTPUT_DIR/dmesg.test.start
 }
 
 result() {
-	SLEEP=2
+	SLEEP=0
 	result=$1
 	shift
 
@@ -31,7 +32,9 @@ result() {
 	;;
 	esac
 	# sleep to let dmesg output flushing
-	sleep $SLEEP
+	if [ $SLEEP -ge 1 ];then
+		sleep $SLEEP
+	fi
 	date +%s > $OUTPUT_DIR/timestamp.test.result
 	dmesg > $OUTPUT_DIR/dmesg.test.result
 	TSTAMP_START=$(cat $OUTPUT_DIR/timestamp.test.start)
