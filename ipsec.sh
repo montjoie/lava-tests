@@ -10,3 +10,8 @@ if [ $? -ne 0 ];then
 	exit 0
 fi
 
+ping ipsec.lava.local
+if [ $? -ne 0 ];then
+	result SKIP "ipsec"
+	exit 0
+fi
