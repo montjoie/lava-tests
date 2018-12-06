@@ -87,3 +87,18 @@ get_machine_model() {
 	MACHINE_MODEL=$(cat $OUTPUT_DIR/machinemodel)
 	MACHINE_MODEL_=$(cat $OUTPUT_DIR/machinemodel | sed 's,[[:space:]],_,g')
 }
+
+# test if config is enabled
+# parameter need to be terminated by =
+check_config() {
+	if [ ! -e /proc/config.gz ];then
+		echo "DEBUG: Cannot check config"
+		return 0
+	fi
+	zgrep -q "^CONFIG_$1" /proc/config.gz
+	if [ $? -eq 0 ];then
+		echo "DEBUG: $1 is enabled"
+		return 0
+	fi
+	return 1
+}

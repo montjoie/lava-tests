@@ -4,6 +4,12 @@
 
 test_rng()
 {
+	TEST_RNG_SKIP=0
+	check_config CRYPTO_USER_API_RNG=
+	if [ $? -ne 0 ];then
+		TEST_RNG_SKIP=1
+	fi
+
 while read line
 do
 	TYPE=$(echo $line |cut -d' ' -f1)
@@ -15,11 +21,15 @@ do
 		TYPE=$(echo $line | sed 's,.*[[:space:]],,')
 		if [ "$TYPE" = 'rng' ];then
 			start_test "Test $DRIVER with kcapi-rng"
-			echo "SEED" | kcapi-rng --name $DRIVER -b 64 > /tmp/rng.out
-			if [ $? -eq 0 ];then
-				result 0 "crypto-RNG-$DRIVER"
+			if [ $TEST_RNG_SKIP -eq 0 ];then
+				echo "SEED" | kcapi-rng --name $DRIVER -b 64 > /tmp/rng.out
+				if [ $? -eq 0 ];then
+					result 0 "crypto-RNG-$DRIVER"
+				else
+					result 1 "crypto-RNG-$DRIVER"
+				fi
 			else
-				result 1 "crypto-RNG-$DRIVER"
+				result SKIP "crypto-RNG-$DRIVER"
 			fi
 		fi
 	;;
