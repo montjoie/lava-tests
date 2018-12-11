@@ -2,6 +2,8 @@
 
 . ./common
 
+get_machine_model
+
 HAVE_ETHTOOL=0
 INTERFACE=eth0
 TEST_PREFIX="test-network"
