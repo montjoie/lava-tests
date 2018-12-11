@@ -79,10 +79,15 @@ is_network_v4_ok() {
 }
 
 get_machine_model() {
-	cat /sys/firmware/devicetree/base/compatible | tr '\0' '\n' > $OUTPUT_DIR/devicetree
+	echo "DEBUG: get_machine_model"
+	if [ -e /sys/firmware/devicetree/base/compatible ];then
+		cat /sys/firmware/devicetree/base/compatible | tr '\0' '\n' > $OUTPUT_DIR/devicetree
+	else
+		echo "DEBUG: get_machine_model: No devicetree"
+	fi
 	dmesg | grep 'Machine model:' | sed 's,.*:[[:space:]],,' > $OUTPUT_DIR/machinemodel
 	if [ ! -s $OUTPUT_DIR/machinemodel ];then
-		echo "unknow" > $OUTPUT_DIR/machinemodel
+		echo "machine_model_unknow" > $OUTPUT_DIR/machinemodel
 	fi
 	MACHINE_MODEL=$(cat $OUTPUT_DIR/machinemodel)
 	MACHINE_MODEL_=$(cat $OUTPUT_DIR/machinemodel | sed 's,[[:space:]],_,g')
