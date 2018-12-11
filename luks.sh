@@ -2,6 +2,15 @@
 
 . ./common
 
+check_config CONFIG_DM_CRYPT
+if [ $? -ne 0 ];then
+	echo "DEBUG: Missing CONFIG_DM_CRYPT"
+fi
+check_config CONFIG_CRYPTO_XTS
+if [ $? -ne 0 ];then
+	echo "DEBUG: Missing CONFIG_XTS"
+fi
+
 start_test "Check presence of cryptsetup"
 cryptsetup --version
 if [ $? -ne 0 ];then
