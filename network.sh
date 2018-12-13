@@ -26,6 +26,11 @@ start_test "Run ip route"
 ip route
 result $? "ip-route"
 
+start_test "Test gateway"
+GATEWAY_IP=$(ip route |grep ^default | cut -d' ' -f3)
+ping -c4 $GATEWAY_IP
+result $? "ping-gateway"
+
 start_test "Test external network"
 ping -c4 8.8.8.8
 result $? "external-network"
@@ -118,6 +123,8 @@ compare_ethtool() {
 	echo "DEBUG: diff $?"
 }
 
+echo "DEBUG: list interface"
+ls /sys/class/net/
 for iface in $(ls /sys/class/net/)
 do
 	echo "DEBUG: Found $iface"
@@ -127,12 +134,15 @@ do
 	test_interface $1
 done
 
+start_test "Detect ethtool"
 /usr/sbin/ethtool --version
 if [ $? -eq 0 ];then
 	HAVE_ETHTOOL=1
 fi
+result 0 "detect-ethtool"
 
 if [ $HAVE_ETHTOOL -eq 1 ];then
+	start_test "Run ethtool"
 	/usr/sbin/ethtool eth0
 	result $? test-ethtool
 
