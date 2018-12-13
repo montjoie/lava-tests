@@ -72,6 +72,7 @@ kci_netdev_ethtool_test()
 
 test_interface() {
 	if [ -z "$1" ];then
+		echo "ERROR: Missing argument to test_interface()"
 		return 1
 	fi
 	netdev="$1"
@@ -129,9 +130,10 @@ for iface in $(ls /sys/class/net/)
 do
 	echo "DEBUG: Found $iface"
 	if [ "$iface" == 'lo' ];then
+		echo "SKIP: dont check $iface"
 		continue
 	fi
-	test_interface $1
+	test_interface $iface
 done
 
 start_test "Detect ethtool"
