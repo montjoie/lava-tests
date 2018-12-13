@@ -88,7 +88,7 @@ get_machine_model() {
 	dmesg | grep 'Machine model:' | sed 's,.*:[[:space:]],,' > $OUTPUT_DIR/machinemodel
 	if [ ! -s $OUTPUT_DIR/machinemodel ];then
 		# fallback to DMI
-		dmesg |grep 'DMI:' > $OUTPUT_DIR/machinemodel
+		dmesg |grep -o 'DMI:.*' > $OUTPUT_DIR/machinemodel
 		if [ ! -s $OUTPUT_DIR/machinemodel ];then
 			echo "machine_model_unknow" > $OUTPUT_DIR/machinemodel
 		else
