@@ -128,7 +128,7 @@ echo "DEBUG: list interface"
 ls /sys/class/net/
 for iface in $(ls /sys/class/net/)
 do
-	echo "DEBUG: Found $iface"
+	echo "DEBUG: Found interface $iface"
 	if [ "$iface" == 'lo' ];then
 		echo "SKIP: dont check $iface"
 		continue
