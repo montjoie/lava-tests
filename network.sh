@@ -107,6 +107,7 @@ test_interface() {
 }
 
 # compare current ethtool output with a reference one
+# TODO enhance those test
 compare_ethtool() {
 	/usr/sbin/ethtool eth0 > $OUTPUT_DIR/ethtool.raw
 	RET=$?
@@ -124,18 +125,6 @@ compare_ethtool() {
 	echo "DEBUG: diff $?"
 }
 
-echo "DEBUG: list interface"
-ls /sys/class/net/
-for iface in $(ls /sys/class/net/)
-do
-	echo "DEBUG: Found interface $iface"
-	if [ "$iface" == 'lo' ];then
-		echo "SKIP: dont check $iface"
-		continue
-	fi
-	test_interface $iface
-done
-
 start_test "Detect ethtool"
 /usr/sbin/ethtool --version
 if [ $? -eq 0 ];then
@@ -143,34 +132,39 @@ if [ $? -eq 0 ];then
 fi
 result 0 "detect-ethtool"
 
-if [ $HAVE_ETHTOOL -eq 1 ];then
-	start_test "Run ethtool"
-	/usr/sbin/ethtool eth0
-	result $? test-ethtool
+for iface in $(ls /sys/class/net/)
+for f in /sys/class/net/*
+do
+	iface=$(basename $f)
+	driver=$(readlink $f/device/driver/module)
+	if [ ! -z "$driver" ]; then
+		driver=$(basename $driver)
+	else
+		echo "SKIP: dont check $iface with no driver"
+	fi
+	echo "DEBUG: Found interface $iface with driver=$driver"
+	if [ "$iface" == 'lo' ];then
+		echo "SKIP: dont check $iface"
+		continue
+	fi
+	test_interface $iface
+done
 
-	compare_ethtool
-fi
-
-start_test "Detect mii-tool"
-/sbin/mii-tool eth0
-result SKIP "mii-tool"
+# TODO add mii-tool to rootfs
+#start_test "Detect mii-tool"
+#/sbin/mii-tool eth0
+#result SKIP "mii-tool"
 
 start_test "Detect an iperf server"
 ping -c4 iperf.lava.local
-is_network_v4_ok
 if [ $? -eq 0 ];then
 	/usr/bin/iperf3 -c iperf.lava.local
-	result SKIP "iperf"
+	result $? "iperf"
 else
 	result SKIP "iperf"
 fi
 
-dmesg | grep -vf dmesg.ignore | grep -iE 'warn|error|fail'
-result SKIP "dmesg"
-
-# re dmesg
-
-# check counter ifconfig
+# TODO check counter ifconfig
 
 if [ $HAVE_ETHTOOL -eq 1 -a $NBD_ROOT -eq 0 ];then
 	netdev=$INTERFACE
