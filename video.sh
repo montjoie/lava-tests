@@ -30,7 +30,7 @@ done
 DO_DRM_TEST=1
 
 get_machine_model
-start_test "Check if DRM is supported on $MACHINE_MODEL"
+start_test "Check if DRM is supported on $MACHINE_MODEL_"
 for dtree in $(cat $OUTPUT_DIR/devicetree)
 do
 	grep $dtree video.modetest.blacklist
