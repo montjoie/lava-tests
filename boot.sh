@@ -44,3 +44,56 @@ do
 		lava-test-case "boot-log-${loglevel}" --result PASS
 	fi
 done
+
+# now generate a list of probed devices
+SAVED_IFD=$IFS
+IFS=''
+echo "==DRIVER_DUMP=="
+echo "==VERSION=0=="
+echo "drivers:"
+find /sys/devices/ -name uevent|
+while read line
+do
+	grep -q ^DRIVER= "$line"
+	if [ $? -eq 0 ];then
+		DRIVERNAME=$(grep ^DRIVER= "$line" |cut -d= -f2)
+		echo "  - driver: $DRIVERNAME"
+		OFNAME=$(grep OF_NAME= "$line" |cut -d= -f2)
+		if [ ! -z "$OFNAME" ];then
+			echo "    ofname: $OFNAME"
+		fi
+		grep -q ^OF_COMPATIBLE_N= "$line"
+		if [ $? -eq 0 ];then
+			echo "    compatibles:"
+			grep ^OF_COMPATIBLE_[0-9]*= "$line" | cut -d= -f2 |
+			while read compatible
+			do
+				echo "      - $compatible"
+			done
+		fi
+	fi
+done
+echo "==DRIVER_DUMP_END=="
+IFS=$SAVED_IFD
+
+echo "==DRIVER_DUMP=="
+echo "==VERSION=1=="
+echo "drivers:"
+find /sys/bus/*/drivers -mindepth 1 -maxdepth 1 |
+while read driver
+do
+	ls "$driver/" | while read ff
+	do
+		if [ ! -L "$driver/$ff" ];then
+			continue
+		fi
+		readlink "$driver/$ff" |grep -q devices
+		if [ $? -eq 0 ];then
+			DRIVERNAME=$(basename "$driver")
+			echo " - driver: $DRIVERNAME"
+			break
+		fi
+	done
+done
+echo "==DRIVER_DUMP_END=="
+
