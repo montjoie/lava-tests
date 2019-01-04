@@ -13,7 +13,7 @@ start_test "Detect I2C bus"
 i2cdetect -l | tee $OUTPUT_DIR/i2c.list
 result $? "test-detect-i2c-bus"
 
-grep -o '^i2c-[0-9][0-9]*' $OUTPUT_DIR/i2c.list | grep -o '[0-9]*' | sort | uniq |
+grep -o '^i2c-[0-9][0-9]*' $OUTPUT_DIR/i2c.list | grep -o '[0-9]*$' | sort | uniq |
 while read i
 do
 	start_test "Display capabilities of I2C bus $i"
