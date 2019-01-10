@@ -3,14 +3,18 @@
 . ./common
 TEST_PREFIX="audio-"
 
-# try to load all sound modules
-find /lib/modules -type f |grep kernel/sound | sed 's,.*/,,' |
-while read sound_module
-do
-	start_test "Load $sound_module"
-	modprobe $sound_module
-	result $? "${TEST_PREFIX}load-$sound_module"
-done
+if [ -e /lib/modules ];then
+	# try to load all sound modules
+	find /lib/modules -type f |grep kernel/sound | sed 's,.*/,,' |
+	while read sound_module
+	do
+		start_test "Load $sound_module"
+		modprobe $sound_module
+		result $? "${TEST_PREFIX}load-$sound_module"
+	done
+else
+	result SKIP "audio-load-all-modules"
+fi
 
 if [ ! -e /dev/snd ];then
 	result SKIP "audio"
