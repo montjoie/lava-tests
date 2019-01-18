@@ -32,6 +32,11 @@ run:
       - chmod +x ./mmc.sh
       - ./mmc.sh
       - lava-test-set stop test-mmc
+      - echo "Storage tests"
+      - lava-test-set start test-storage
+      - chmod +x ./storage.sh
+      - ./storage.sh
+      - lava-test-set stop test-storage
       - echo "Audio tests"
       - lava-test-set start test-audio
       - chmod +x ./audio.sh
