@@ -99,6 +99,9 @@ get_machine_model() {
 	fi
 	MACHINE_MODEL=$(cat $OUTPUT_DIR/machinemodel)
 	MACHINE_MODEL_=$(cat $OUTPUT_DIR/machinemodel | sed 's,[[:space:]],_,g')
+	echo "===MACHINEMODEL===
+	echo $MACHINE_MODEL_
+	echo "===MACHINEMODEL_END===
 }
 
 # test if config is enabled
