@@ -20,7 +20,7 @@ fi
 
 start_test "Generate fake image"
 # create a fake volume
-dd if=/dev/zero of=$OUTPUT_DIR/fake.img bs=1M count=10
+dd if=/dev/zero of=$OUTPUT_DIR/fake.img bs=1M count=100
 RET=$?
 result $RET "test-luks-generate-img"
 if [ $RET -ne 0 ];then
@@ -66,6 +66,10 @@ if [ $RET -ne 0 ];then
 	exit 0
 fi
 
+start_test "cryptsetup bench"
+dd if=/dev/zero of=/mnt/luks/test oflag=sync bs=1M count=50
+result $RET "test-luks-bench"
+
 start_test "crytpsetup umount"
 umount /mnt/luks
 RET=$?
@@ -82,3 +86,4 @@ if [ $RET -ne 0 ];then
 	exit 0
 fi
 
+rm $OUTPUT_DIR/fake.img
