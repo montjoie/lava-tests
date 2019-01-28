@@ -45,6 +45,10 @@ if [ $RET -ne 0 ];then
 	exit 0
 fi
 
+start_test "crytpsetup status"
+cryptsetup status /dev/mapper/fake
+result $RET "test-luks-status"
+
 start_test "mkfs"
 mkfs.ext4 /dev/mapper/fake
 RET=$?
