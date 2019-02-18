@@ -1,0 +1,13 @@
+metadata:
+  name: Montjoie tests
+  format: "Lava-Test-Shell Test Definition 1.0"
+  description: "Montjoie test"
+  version: 1.0
+run:
+    steps:
+      - echo "AGL tests"
+      - chmod +x ./agl.sh
+      - ./agl.sh $BASEURL
+
+params:
+  BASEURL: ""
