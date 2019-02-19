@@ -61,8 +61,8 @@ result() {
 		return
 	fi
 	if [ $result -eq 0 ];then
-		#echo "<LAVA_SIGNAL_TESTCASE $* RESULT=PASS>"
-		lava-test-case $* --result PASS
+		#echo "<LAVA_SIGNAL_TESTCASE $* RESULT=pass>"
+		lava-test-case $* --result pass
 	else
 		#echo "<LAVA_SIGNAL_TESTCASE $* RESULT=FAIL>"
 		lava-test-case $* --result FAIL
