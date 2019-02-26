@@ -57,5 +57,10 @@ run:
       - chmod +x ./sensors.sh
       - ./sensors.sh
       - lava-test-set stop test-sensors
+      - echo "EEPROM/NVMEM tests"
+      - lava-test-set start test-nvmems
+      - chmod +x ./nvmem.sh
+      - ./nvmem.sh
+      - lava-test-set stop test-nvmems
       - chmod +x ./final.sh
       - ./final.sh
