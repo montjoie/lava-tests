@@ -28,7 +28,7 @@ do
 	if [ $? -eq 0 ];then
 		lava-test-case "boot-log-${loglevel}" --result pass
 	else
-		lava-test-case "boot-log-${loglevel}" --result FAIL
+		lava-test-case "boot-log-${loglevel}" --result fail
 	fi
 done
 
@@ -39,7 +39,7 @@ do
 	echo "=============================================="
 	check_loglevel $loglevel
 	if [ $? -eq 1 ];then
-		lava-test-case "boot-log-${loglevel}" --result FAIL
+		lava-test-case "boot-log-${loglevel}" --result fail
 	else
 		lava-test-case "boot-log-${loglevel}" --result pass
 	fi

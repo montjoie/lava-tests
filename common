@@ -50,14 +50,14 @@ result() {
 	echo "============================================== TIME=$TSTAMP_DIFF"
 	diff -u $OUTPUT_DIR/dmesg.test.start $OUTPUT_DIR/dmesg.test.result
 	echo "=============================================="
-	if [ "$result" == 'SKIP' ];then
+	if [ "$result" == 'SKIP' -o "$result" == 'skip' ];then
 		#echo "<LAVA_SIGNAL_TESTCASE $* RESULT=SKIP>"
-		lava-test-case $* --result SKIP
+		lava-test-case $* --result skip
 		return
 	fi
 	if [ $result -eq 127 ];then
 		#echo "<LAVA_SIGNAL_TESTCASE $* RESULT=SKIP>"
-		lava-test-case $* --result SKIP
+		lava-test-case $* --result skip
 		return
 	fi
 	if [ $result -eq 0 ];then
@@ -65,7 +65,7 @@ result() {
 		lava-test-case $* --result pass
 	else
 		#echo "<LAVA_SIGNAL_TESTCASE $* RESULT=FAIL>"
-		lava-test-case $* --result FAIL
+		lava-test-case $* --result fail
 	fi
 }
 
