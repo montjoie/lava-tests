@@ -39,6 +39,7 @@ do
 	echo "DEBUG: Load $module"
 	#start_test "Load $module"
 	modprobe $module
+	echo "DEBUG: ret=$?"
 	#result $? "wifi-load-$wifi_module"
 done
 result 0 "test-module-load-all"
