@@ -82,6 +82,7 @@ get_machine_model() {
 	echo "DEBUG: get_machine_model"
 	if [ -e /sys/firmware/devicetree/base/compatible ];then
 		cat /sys/firmware/devicetree/base/compatible | tr '\0' '\n' > $OUTPUT_DIR/devicetree
+		echo "DEBUG: from devicetree got $(cat /sys/firmware/devicetree/base/compatible)"
 	else
 		echo "DEBUG: get_machine_model: No devicetree"
 	fi
@@ -90,7 +91,13 @@ get_machine_model() {
 		# fallback to DMI
 		dmesg |grep -o 'DMI:.*' > $OUTPUT_DIR/machinemodel
 		if [ ! -s $OUTPUT_DIR/machinemodel ];then
-			echo "machine_model_unknow" > $OUTPUT_DIR/machinemodel
+			# last try
+			dmesg |grep -qE 'QEMU HARDDISK|QEMU DVD'
+			if [ $? -eq 0 ];then
+				echo "QEMU-$(uname -m)" > $OUTPUT_DIR/machinemodel
+			else
+				echo "machine_model_unknow" > $OUTPUT_DIR/machinemodel
+			fi
 		else
 			echo "DEBUG: got machinemodel from DMI"
 		fi
