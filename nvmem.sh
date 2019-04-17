@@ -24,6 +24,12 @@ while read nvmemfile
 do
 	NAME=$(echo $nvmemfile | sed 's,/nvmem$,,' | sed 's,.*/,,')
 	start_test "Dump NVMEM $NAME"
+	grep -qE 'QEMU-sparc64'  $OUTPUT_DIR/machinemodel
+	if [ $? -eq 0 ];then
+		echo "DEBUG: skip due to qemu crash"
+		result SKIP "nvmem-$NAME"
+		continue
+	fi
 	hexdump -C $nvmemfile
 	result $? "nvmem-$NAME"
 	# TODO sunxi-sid test of first values
