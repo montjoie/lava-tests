@@ -22,7 +22,7 @@ do
 		if [ "$TYPE" = 'rng' ];then
 			start_test "Test $DRIVER with kcapi-rng"
 			if [ $TEST_RNG_SKIP -eq 0 ];then
-				echo "SEED" | kcapi-rng --name $DRIVER -b 64 > /tmp/rng.out
+				echo "SEED" | kcapi-rng --name $DRIVER -b 64 > $OUTPUT_DIR/rng.out
 				if [ $? -eq 0 ];then
 					result 0 "crypto-RNG-$DRIVER"
 				else
@@ -40,11 +40,27 @@ done < /proc/crypto
 }
 
 start_test "Test kernel crypto via the tcrypt module"
-modprobe tcrypt
-if [ $? -eq 1 ];then
-	result SKIP "crypto-tcrypt"
-else
+modprobe tcrypt 2> $OUTPUT_DIR/tcrypt.err
+RET=$?
+cat $OUTPUT_DIR/tcrypt.err
+if [ $RET -eq 0 ];then
+	# never happen
+	echo "WARN: should not happen"
 	result 0 "crypto-tcrypt"
+else
+	if [ $RET -eq 1 ];then
+		# normal case, check error message
+		grep -q 'Resource temporarily unavailable' $OUTPUT_DIR/tcrypt.err
+		if [ $? -eq 0 ];then
+			echo "DEBUG: tcrypt real success"
+			result 0 "crypto-tcrypt"
+		else
+			result 0 "crypto-tcrypt"
+		fi
+	else
+		echo "DEBUG: unknow return code $RET"
+		result $RET "crypto-tcrypt"
+	fi
 fi
 
 kcapi-rng --version
@@ -53,8 +69,6 @@ if [ $? -eq 0 ];then
 else
 	result SKIP "crypto-RNG"
 fi
-
-# re dmesg
 
 # check for some result
 # tcrypt generate error -2 for non-present algs
@@ -66,3 +80,4 @@ else
 	result 0 "crypto-error-log"
 fi
 
+#TODO create a test case for each alg passed in /proc/crypto
