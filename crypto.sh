@@ -40,6 +40,7 @@ done < /proc/crypto
 }
 
 start_test "Test kernel crypto via the tcrypt module"
+dmesg --console-on
 modprobe tcrypt 2> $OUTPUT_DIR/tcrypt.err
 RET=$?
 cat $OUTPUT_DIR/tcrypt.err
@@ -62,6 +63,7 @@ else
 		result $RET "crypto-tcrypt"
 	fi
 fi
+dmesg --console-off
 
 kcapi-rng --version
 if [ $? -eq 0 ];then
