@@ -105,6 +105,9 @@ get_machine_model() {
 			dmesg |grep -qE 'QEMU HARDDISK|QEMU DVD'
 			if [ $? -eq 0 ];then
 				echo "QEMU-$(uname -m)" > $OUTPUT_DIR/machinemodel
+				if [ -s $OUTPUT_DIR/devicetree ];then
+					echo "QEMU-$(uname -m)-$(cat $OUTPUT_DIR/devicetree)" > $OUTPUT_DIR/machinemodel
+				fi
 			else
 				echo "machine_model_unknow" > $OUTPUT_DIR/machinemodel
 			fi
