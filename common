@@ -24,6 +24,11 @@ start_test()
 	dmesg --console-off
 	date +%s > $OUTPUT_DIR/timestamp.test.start
 	dmesg > $OUTPUT_DIR/dmesg.test.start
+	RET=$?
+	if [ $RET -ne 0 ];then
+		echo "ERROR: fail to write dmesg (err=$RET)"
+		du -ah $OUTPUT_DIR/
+	fi
 }
 
 result() {
@@ -38,16 +43,21 @@ result() {
 		shift
 	;;
 	esac
-	# sleep to let dmesg output flushing
-	if [ $SLEEP -ge 1 ];then
-		sleep $SLEEP
-	fi
 	date +%s > $OUTPUT_DIR/timestamp.test.result
-	dmesg > $OUTPUT_DIR/dmesg.test.result
 	TSTAMP_START=$(cat $OUTPUT_DIR/timestamp.test.start)
 	TSTAMP_RESULT=$(cat $OUTPUT_DIR/timestamp.test.result)
 	TSTAMP_DIFF=$(($TSTAMP_RESULT-$TSTAMP_START))
 	echo "============================================== TIME=$TSTAMP_DIFF"
+	# sleep to let dmesg output flushing
+	if [ $SLEEP -ge 1 ];then
+		sleep $SLEEP
+	fi
+	dmesg > $OUTPUT_DIR/dmesg.test.result
+	RET=$?
+	if [ $RET -ne 0 ];then
+		echo "ERROR: fail to write dmesg (err=$RET)"
+		du -ah $OUTPUT_DIR/
+	fi
 	diff -u $OUTPUT_DIR/dmesg.test.start $OUTPUT_DIR/dmesg.test.result
 	echo "=============================================="
 	if [ "$result" == 'SKIP' -o "$result" == 'skip' ];then
