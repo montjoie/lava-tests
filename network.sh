@@ -43,28 +43,29 @@ result $? "dns"
 # arg1: return code for not supported (see ethtool code source)
 # arg2: summary of the command
 # arg3: command to execute
+# arg4: netdev used
 kci_netdev_ethtool_test()
 {
 	if [ $# -le 2 ];then
-		echo "SKIP: $netdev: ethtool: invalid number of arguments"
+		echo "SKIP: $4: ethtool: invalid number of arguments"
 		return 1
 	fi
 	start_test "Test ethtool $2 on $4"
 	echo "DEBUG: run $3"
-	$3 >/dev/null
+	$3
 	ret=$?
 	if [ $ret -ne 0 ];then
 		if [ $ret -eq "$1" ];then
 			#echo "SKIP: $netdev: ethtool $2 not supported"
-			result SKIP --sleep 3 "network-$netdev-ethtool-$2"
+			result SKIP --sleep 3 "network-$4-ethtool-$2"
 			return 0
 		else
 			#echo "FAIL: $netdev: ethtool $2"
-			result 1 --sleep 3 "network-$netdev-ethtool-$2"
+			result 1 --sleep 3 "network-$4-ethtool-$2"
 			return 0
 		fi
 	else
-		result 0 --sleep 3 "network-$netdev-ethtool-$2"
+		result 0 --sleep 3 "network-$4-ethtool-$2"
 	fi
 	return 0
 }
@@ -82,6 +83,7 @@ test_interface() {
 	ethtool -k $1
 	result $? "network-$1-ethtool-features-list"
 
+	kci_netdev_ethtool_test 74 'selftest' "ethtool --test $netdev online" "$netdev"
 	kci_netdev_ethtool_test 74 'dump' "ethtool -d $netdev" "$netdev"
 	kci_netdev_ethtool_test 94 'stats' "ethtool -S $netdev" "$netdev"
 
