@@ -134,7 +134,7 @@ if [ $? -eq 0 ];then
 fi
 result 0 "detect-ethtool"
 
-for iface in $(ls /sys/class/net/)
+#for iface in $(ls /sys/class/net/)
 for f in /sys/class/net/*
 do
 	iface=$(basename $f)
