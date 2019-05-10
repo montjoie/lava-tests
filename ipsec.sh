@@ -10,8 +10,22 @@ if [ $? -ne 0 ];then
 	exit 0
 fi
 
-ping ipsec.lava.local
+ping -c4 ipsec.lava.local
 if [ $? -ne 0 ];then
 	result SKIP "ipsec"
+	exit 0
+fi
+
+result SKIP "ipsec"
+exit 0
+
+dd if=/dev/urandom count=32 bs=1 2>/dev/null | xxd -p -c 64 > $OUTPUT_DIR/ipsec.key
+if [ $? -ne 0 ];then
+	result SKIP "ipsec generate key"
+	exit 0
+fi
+
+if [ ! -s $OUTPUT_DIR/ipsec.key ];then
+	result SKIP "ipsec generate key"
 	exit 0
 fi
