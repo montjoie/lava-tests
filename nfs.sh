@@ -22,7 +22,7 @@ MNTPOINT=/tmp/test
 mkdir -p $MNTPOINT
 
 # mount
-mount -t nfs -o rw,tcp,hard,intr,async,vers=3,timeo=2,retrans=2 192.168.1.8:/var/tmp/lava-nfs/ $MNTPOINT
+mount -t nfs -o rw,tcp,hard,intr,async,vers=3,timeo=2,retrans=2 nfs.lava.local:/var/tmp/lava-nfs/ $MNTPOINT
 RET=$?
 result $RET "NFSmount"
 if [ $RET -ne 0 ];then
