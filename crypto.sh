@@ -22,12 +22,28 @@ do
 		if [ "$TYPE" = 'rng' ];then
 			start_test "Test $DRIVER with kcapi-rng"
 			if [ $TEST_RNG_SKIP -eq 0 ];then
-				echo "SEED" | kcapi-rng --name $DRIVER -b 64 > $OUTPUT_DIR/rng.out
-				if [ $? -eq 0 ];then
-					result 0 "crypto-RNG-$DRIVER"
+				scripts/testrng.sh $DRIVER $OUTPUT_DIR &
+				PID=$!
+				timeelapsed=0
+				while [ $timeelapsed -le 60 ]
+				do
+					if [ -e $OUTPUT_DIR/rng.ret ];then
+						break
+					fi
+					sleep 1
+					timeelapsed=$(($timeelapsed+1))
+				done
+				if [ $timeelapsed -ge 60 ];then
+					kill $PID
+					echo "ERROR: RNG timeout!"
+					RET=1
 				else
-					result 1 "crypto-RNG-$DRIVER"
+					RET=$(cat $OUTPUT_DIR/rng.ret)
+					echo "DEBUG: rng exit ret=$RET after $timeelapsed seconds"
 				fi
+				rm -f $OUTPUT_DIR/rng.ret
+				rm -f $OUTPUT_DIR/rng.out
+				result $RET "crypto-RNG-$DRIVER"
 			else
 				result SKIP "crypto-RNG-$DRIVER"
 			fi
