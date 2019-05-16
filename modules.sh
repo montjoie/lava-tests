@@ -9,11 +9,16 @@ FINAL_CODE=0
 > $MODULES_RM
 
 try_remove() {
-	sort -k3 /proc/modules | grep -vf modules.remove.blacklist | cut -d' ' -f1 > $MODULES_LIST
+	sort -k3 /proc/modules | cut -d' ' -f1 > $MODULES_LIST
 	if [ -s "$MODULES_LIST" ];then
 		while read module
 		do
 			start_test "Rmmod $module"
+			grep -q "^$module$" modules.remove.blacklist
+			if [ $? -eq 0 ];then
+				result SKIP "rmmod-$module"
+				continue
+			fi
 			echo "DEBUG: try $module"
 			rmmod $module
 			RET=$?
