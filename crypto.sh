@@ -55,6 +55,12 @@ do
 done < /proc/crypto
 }
 
+if [ -e /sys/kernel/debug/amlogic-crypto/stats ];then
+	cat /sys/kernel/debug/amlogic-crypto/stats
+else
+	ls -l /sys/kernel/debug/
+fi
+
 start_test "Test kernel crypto via the tcrypt module"
 dmesg --console-on
 modprobe tcrypt 2> $OUTPUT_DIR/tcrypt.err
@@ -96,6 +102,10 @@ if [ $? -eq 0 ];then
 	result 1 "crypto-error-log"
 else
 	result 0 "crypto-error-log"
+fi
+
+if [ -e /sys/kernel/debug/amlogic-crypto/stats ];then
+	cat /sys/kernel/debug/amlogic-crypto/stats
 fi
 
 #TODO create a test case for each alg passed in /proc/crypto
