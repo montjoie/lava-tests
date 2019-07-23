@@ -55,11 +55,16 @@ do
 done < /proc/crypto
 }
 
-if [ -e /sys/kernel/debug/amlogic-crypto/stats ];then
-	cat /sys/kernel/debug/amlogic-crypto/stats
-else
-	ls -l /sys/kernel/debug/
-fi
+echo "DEBUG: stats"
+mount -t debugfs none /sys/kernel/debug
+for dirstat in gxl-crypto amlogic-crypto sun8i-ce sun8i-ss
+do
+	echo "DEBUG: test $dirstat"
+	if [ -e /sys/kernel/debug/$dirstat/stats ];then
+		cat /sys/kernel/debug/$dirstat/stats
+	fi
+done
+echo "DEBUG: end of stats"
 
 start_test "Test kernel crypto via the tcrypt module"
 dmesg --console-on
@@ -104,8 +109,12 @@ else
 	result 0 "crypto-error-log"
 fi
 
-if [ -e /sys/kernel/debug/amlogic-crypto/stats ];then
-	cat /sys/kernel/debug/amlogic-crypto/stats
-fi
+for dirstat in gxl-crypto amlogic-crypto sun8i-ce sun8i-ss
+do
+	echo "DEBUG: test $dirstat"
+	if [ -e /sys/kernel/debug/$dirstat/stats ];then
+		cat /sys/kernel/debug/$dirstat/stats
+	fi
+done
 
 #TODO create a test case for each alg passed in /proc/crypto
