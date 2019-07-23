@@ -42,12 +42,20 @@ find /lib/modules -type f |grep kernel/ | sed 's,.*/,,' |
 while read module
 do
 	echo "DEBUG: Load $module"
-	#start_test "Load $module"
-	modprobe $module
-	echo "DEBUG: ret=$?"
-	#result $? "wifi-load-$wifi_module"
+	start_test "Load $module"
+	modprobe $module 2> $OUTPUT_DIR/modprobe.err
+	RET=$?
+	echo "DEBUG: ret=$RET"
+	grep -Ei 'no such device' $OUTPUT_DIR/modprobe.err
+	if [ $? -eq 0 ];then
+		RET=0
+	fi
+	if [ $module == 'tcrypt' ];then
+		RET=0
+	fi
+	result $RET "load-$module"
 done
-result 0 "test-module-load-all"
+#result 0 "test-module-load-all"
 
 
 for i in $(seq 1 10)
@@ -63,14 +71,12 @@ do
 	start_test "Modprobe $module"
 	echo "DEBUG: modprobe $module"
 	modprobe $module
-	if [ $? -ne 0 ];then
-		echo "FAIL: $module"
-		FINAL_CODE=1
-		result 1 "modprobe-$module"
-	else
-		result 0 "modprobe-$module"
-		#echo "DEBUG: modprobe $module ok"
+	RET=$?
+	if [ $RET -ne 0 ];then
+		echo "FAIL: $module ret=$RET"
+		RET=1
 	fi
+	result $RET --sleep 2 "modprobe-$module"
 done < $MODULES_RM
 
 rm $MODULES_LIST
