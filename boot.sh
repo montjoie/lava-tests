@@ -105,3 +105,6 @@ else
 	echo "DEBUG: Run on $MACHINE_MODEL_"
 	result 0 get-machine-model
 fi
+
+echo "DEBUG: avallable firmware on the rootfs"
+find /lib/firmware -type f
