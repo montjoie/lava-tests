@@ -117,4 +117,28 @@ do
 	fi
 done
 
-#TODO create a test case for each alg passed in /proc/crypto
+while read line
+do
+	SECTION=$(echo $line |cut -d' ' -f1)
+	case $SECTION in
+	driver)
+		DRIVER=$(echo $line | sed 's,.*[[:space:]],,' | sed 's,[()],_',g)
+	;;
+	type)
+		TYPE=$(echo $line | sed 's,.*[[:space:]],,')
+	;;
+	selftest)
+		SELFTEST=$(echo $line | sed 's,.*[[:space:]],,')
+	;;
+	"")
+		if [ "$SELFTEST" == 'passed' ];then
+			RESULT='pass'
+		else
+			RESULT='fail'
+		fi
+		lava-test-case $TYPE-$DRIVER --result $RESULT
+	;;
+	*)
+	;;
+	esac
+done < /proc/crypto
