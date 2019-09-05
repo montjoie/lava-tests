@@ -2,11 +2,11 @@
 
 . ./common
 
-check_config CONFIG_DM_CRYPT
+check_config DM_CRYPT
 if [ $? -ne 0 ];then
 	echo "DEBUG: Missing CONFIG_DM_CRYPT"
 fi
-check_config CONFIG_CRYPTO_XTS
+check_config CRYPTO_XTS
 if [ $? -ne 0 ];then
 	echo "DEBUG: Missing CONFIG_XTS"
 fi
@@ -17,6 +17,12 @@ if [ $? -ne 0 ];then
 	result SKIP "test-luks-cryptsetup"
 	exit 0
 fi
+
+start_test "cryptsetup benchmark"
+cryptsetup benchmark > $OUTPUT_DIR/cryptsetup-benchmark
+result $RET "test-luks-cryptsetup-benchmark"
+cat $OUTPUT_DIR/cryptsetup-benchmark
+#TODO analysis of output
 
 start_test "Generate fake image"
 # create a fake volume
@@ -66,7 +72,7 @@ if [ $RET -ne 0 ];then
 	exit 0
 fi
 
-start_test "cryptsetup bench"
+start_test "cryptsetup bench the disk"
 dd if=/dev/zero of=/mnt/luks/test oflag=sync bs=1M count=50
 result $RET "test-luks-bench"
 
