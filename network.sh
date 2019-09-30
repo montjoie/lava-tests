@@ -243,7 +243,7 @@ if [ $HAVE_ETHTOOL -eq 1 -a $NBD_ROOT -eq 0 ];then
 		fi
 	done < $OUTPUT_DIR/ethtool.mode.supported
 	#go back to current mode
-	kci_netdev_ethtool_test 666 "change-speed-to-$ethmode" "ethtool -s $netdev speed $CURRENT_SPEED duplex $CURRENT_DUPLEX" "$netdev"
+	kci_netdev_ethtool_test 666 "change-speed-back" "ethtool -s $netdev speed $CURRENT_SPEED duplex $CURRENT_DUPLEX" "$netdev"
 
 fi
 
