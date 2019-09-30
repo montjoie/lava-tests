@@ -97,12 +97,27 @@ rm $OUTPUT_DIR/fake.img
 test_pluks()
 {
 LUKSMAX=$1
+FLAG="oflag=sync"
+DDMODE="sync"
+case $2 in
+async)
+	FLAG=""
+	DDMODE="async"
+;;
+async2)
+	FLAG="oflag=nonblock"
+	DDMODE="async2"
+;;
+*)
+	FLAG="oflag=sync"
+;;
+esac
 for luksid in $(seq 1 $LUKSMAX)
 do
 	start_test "Generate fake image $luksid"
 	dd if=/dev/zero of=$OUTPUT_DIR/fake${luksid}.img bs=1M count=100
 	RET=$?
-	result $RET "test-pluks-generate-img${luksid}"
+	result $RET "test-pluks-generate-img${luksid}-${LUKSMAX}-${DDMODE}"
 	if [ $RET -ne 0 ];then
 		return 0
 	fi
@@ -112,7 +127,7 @@ do
 	start_test "crytpsetup format image$luksid"
 	cryptsetup --key-file=$OUTPUT_DIR/fake${luksid}.key --batch-mode luksFormat $OUTPUT_DIR/fake${luksid}.img
 	RET=$?
-	result $RET "test-pluks-format-img${luksid}"
+	result $RET "test-pluks-format-img${luksid}-${LUKSMAX}-${DDMODE}"
 	if [ $RET -ne 0 ];then
 		return 0
 	fi
@@ -120,19 +135,19 @@ do
 	start_test "crytpsetup open image${luksid}"
 	cryptsetup --key-file=$OUTPUT_DIR/fake${luksid}.key --batch-mode luksOpen $OUTPUT_DIR/fake${luksid}.img fake${luksid}
 	RET=$?
-	result $RET "test-pluks-open-img${luksid}"
+	result $RET "test-pluks-open-img${luksid}-${LUKSMAX}-${DDMODE}"
 	if [ $RET -ne 0 ];then
 		return 0
 	fi
 
 	start_test "crytpsetup status image${luksid}"
 	cryptsetup status /dev/mapper/fake${luksid}
-	result $RET "test-pluks-status-img${luksid}"
+	result $RET "test-pluks-status-img${luksid}-${LUKSMAX}-${DDMODE}"
 
 	start_test "mkfs LUKS image${luksid}"
 	mkfs.ext4 /dev/mapper/fake${luksid}
 	RET=$?
-	result $RET "test-pluks-mkfs-img${luksid}"
+	result $RET "test-pluks-mkfs-img${luksid}-${LUKSMAX}-${DDMODE}"
 	if [ $RET -ne 0 ];then
 		return 0
 	fi
@@ -141,20 +156,28 @@ do
 	start_test "crytpsetup mount image${luksid}"
 	mount /dev/mapper/fake${luksid} /mnt/luks${luksid}
 	RET=$?
-	result $RET "test-pluks-mount-img${luksid}"
+	result $RET "test-pluks-mount-img${luksid}-${LUKSMAX}-${DDMODE}"
 	if [ $RET -ne 0 ];then
 		return 0
 	fi
 done
 
 
-	start_test "cryptsetup bench the disk in parallel"
+	start_test "cryptsetup bench the disk in parallel on $LUKSMAX images mode=$DDMODE"
 	for luksid in $(seq 1 $LUKSMAX)
 	do
-		dd if=/dev/zero of=/mnt/luks${luksid}/test oflag=sync bs=1M count=50 &
+		dd if=/dev/zero of=/mnt/luks${luksid}/test $FLAG bs=256k count=200 &
 	done
 	wait
-	result $RET "test-pluks-bench-$LUKSMAX"
+	result $RET "test-pluks-bench-${LUKSMAX}-${DDMODE}"
+
+	start_test "cryptsetup readbench the disk in parallel on $LUKSMAX images mode=$DDMODE"
+	for luksid in $(seq 1 $LUKSMAX)
+	do
+		dd if=/mnt/luks${luksid}/test of=/dev/null $FLAG bs=256k count=200 &
+	done
+	wait
+	result $RET "test-pluks-readbench-${LUKSMAX}-${DDMODE}"
 
 
 for luksid in $(seq 1 $LUKSMAX)
@@ -162,7 +185,7 @@ do
 	start_test "crytpsetup umount image${luksid}"
 	umount /mnt/luks${luksid}
 	RET=$?
-	result $RET "test-pluks-umount-img${luksid}"
+	result $RET "test-pluks-umount-img${luksid}-${LUKSMAX}-${DDMODE}"
 	if [ $RET -ne 0 ];then
 		return 0
 	fi
@@ -170,7 +193,7 @@ do
 	start_test "crytpsetup close image${luksid}"
 	cryptsetup luksClose fake${luksid}
 	RET=$?
-	result $RET "test-pluks-format-close-img${luksid}"
+	result $RET "test-pluks-format-close-img${luksid}-${LUKSMAX}-${DDMODE}"
 	if [ $RET -ne 0 ];then
 		return 0
 	fi
@@ -181,3 +204,7 @@ done
 
 test_pluks 2
 test_pluks 4
+test_pluks 2 async
+test_pluks 4 async
+test_pluks 2 async2
+test_pluks 4 async2
