@@ -6,6 +6,7 @@ else
 	OUTPUT_DIR=/tmp/output
 fi
 mkdir -p $OUTPUT_DIR
+echo "DEBUG: OUTPUT_DIR is $OUTPUT_DIR"
 
 if [ -e /rootfs.version ];then
 	echo "=============================================="
@@ -14,6 +15,8 @@ if [ -e /rootfs.version ];then
 	rm /rootfs.version
 fi
 
+# Print the start of a test
+# register the current dmesg
 start_test()
 {
 	echo "=============================================="
@@ -31,6 +34,8 @@ start_test()
 	fi
 }
 
+# Print the end of a test
+# Print all kernel messages that appears durint the test
 result() {
 	SLEEP=0
 	result=$1
