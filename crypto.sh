@@ -55,17 +55,9 @@ do
 done < /proc/crypto
 }
 
-echo "DEBUG: stats"
-mount -t debugfs none /sys/kernel/debug
-for dirstat in gxl-crypto amlogic-crypto sun8i-ce sun8i-ss
-do
-	echo "DEBUG: test $dirstat"
-	if [ -e /sys/kernel/debug/$dirstat/stats ];then
-		cat /sys/kernel/debug/$dirstat/stats
-	fi
-done
-echo "DEBUG: end of stats"
+print_crypto_stat
 
+# for all crypto algorithm to load by testing them via the tcrypt module
 start_test "Test kernel crypto via the tcrypt module"
 modprobe tcrypt 2> $OUTPUT_DIR/tcrypt.err
 RET=$?
@@ -107,13 +99,7 @@ else
 	result 0 "crypto-error-log"
 fi
 
-for dirstat in gxl-crypto amlogic-crypto sun8i-ce sun8i-ss
-do
-	echo "DEBUG: test $dirstat"
-	if [ -e /sys/kernel/debug/$dirstat/stats ];then
-		cat /sys/kernel/debug/$dirstat/stats
-	fi
-done
+print_crypto_stat
 
 while read line
 do

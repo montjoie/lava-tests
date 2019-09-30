@@ -143,3 +143,17 @@ check_config() {
 	fi
 	return 1
 }
+
+print_crypto_stat()
+{
+	echo "DEBUG: check for crypto stats"
+	mount -t debugfs none /sys/kernel/debug
+	for dirstat in gxl-crypto amlogic-crypto sun8i-ce sun8i-ss
+	do
+		echo "DEBUG: test cryptostat $dirstat"
+		if [ -e /sys/kernel/debug/$dirstat/stats ];then
+			cat /sys/kernel/debug/$dirstat/stats
+		fi
+	done
+	echo "DEBUG: end of stats"
+}

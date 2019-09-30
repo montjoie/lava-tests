@@ -202,9 +202,16 @@ do
 done
 }
 
+print_crypto_stat
 test_pluks 2
+print_crypto_stat
 test_pluks 4
+print_crypto_stat
 test_pluks 2 async
+print_crypto_stat
 test_pluks 4 async
+print_crypto_stat
 test_pluks 2 async2
+print_crypto_stat
 test_pluks 4 async2
+print_crypto_stat
