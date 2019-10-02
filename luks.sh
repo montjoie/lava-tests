@@ -99,6 +99,7 @@ test_pluks()
 LUKSMAX=$1
 FLAG="oflag=sync"
 DDMODE="sync"
+CREATE_OPTS="--type luks2 --sector-size=4096 --size=4096"
 case $2 in
 async)
 	FLAG=""
@@ -125,7 +126,7 @@ do
 	echo "key$luksid" >$OUTPUT_DIR/fake${luksid}.key
 
 	start_test "crytpsetup format image$luksid"
-	cryptsetup --key-file=$OUTPUT_DIR/fake${luksid}.key --batch-mode luksFormat $OUTPUT_DIR/fake${luksid}.img
+	cryptsetup --key-file=$OUTPUT_DIR/fake${luksid}.key --batch-mode $CREATE_OPTS luksFormat $OUTPUT_DIR/fake${luksid}.img
 	RET=$?
 	result $RET "test-pluks-format-img${luksid}-${LUKSMAX}-${DDMODE}"
 	if [ $RET -ne 0 ];then
