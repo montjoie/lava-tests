@@ -180,6 +180,17 @@ done
 	wait
 	result $RET "test-pluks-readbench-${LUKSMAX}-${DDMODE}"
 
+	#check the result
+	RET=0
+	for luksid in $(seq 1 $LUKSMAX)
+	do
+		MD5=$(md5sum /mnt/luks${luksid}/test | cut -d' ' -f1)
+		if [ "$MD5" != '25e317773f308e446cc84c503a6d1f85' ];then
+			RET=1
+			echo "ERROR: invalid md5 ($MD5) for $luksid "
+		fi
+	done
+	result $RET "test-pluks-bench-md5-${LUKSMAX}-${DDMODE}"
 
 for luksid in $(seq 1 $LUKSMAX)
 do
