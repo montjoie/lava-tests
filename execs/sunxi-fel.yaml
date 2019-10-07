@@ -1,0 +1,10 @@
+metadata:
+  name: Montjoie tests
+  format: "Lava-Test-Shell Test Definition 1.0"
+  description: "Montjoie test"
+  version: 1.0
+run:
+    steps:
+      - echo "sunxi-fel tests"
+      - chmod +x ./sunxi-fel.sh
+      - ./sunxi-fel.sh
