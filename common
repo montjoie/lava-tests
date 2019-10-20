@@ -65,6 +65,10 @@ result() {
 	fi
 	diff -u $OUTPUT_DIR/dmesg.test.start $OUTPUT_DIR/dmesg.test.result
 	echo "=============================================="
+	if [ "$result" == 'FAIL' -o "$result" == 'fail' ];then
+		lava-test-case $* --result fail
+		return
+	fi
 	if [ "$result" == 'SKIP' -o "$result" == 'skip' ];then
 		#echo "<LAVA_SIGNAL_TESTCASE $* RESULT=SKIP>"
 		lava-test-case $* --result skip
