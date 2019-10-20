@@ -1,0 +1,14 @@
+metadata:
+  name: Montjoie Gentoo tests
+  format: "Lava-Test-Shell Test Definition 1.0"
+  description: "Montjoie test gentoo"
+  version: 1.0
+run:
+    steps:
+      - echo "Gentoo tests"
+      - lava-test-set start test-gentoo
+      - chmod +x ./gentoo.sh
+      - ./gentoo.sh --portage-url $PORTAGE_URL
+      - lava-test-set stop
+params:
+  PORTAGE_URL: ""
