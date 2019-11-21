@@ -51,6 +51,11 @@ if [ $RET -ne 0 ];then
 	exit 0
 fi
 
+if [ ! -e /dev/mapper/fake ];then
+	echo "DEBUG: no fake mapper, exiting"
+	exit 0
+fi
+
 start_test "crytpsetup status"
 cryptsetup status /dev/mapper/fake
 result $RET "test-luks-status"
