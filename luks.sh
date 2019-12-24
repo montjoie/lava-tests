@@ -135,6 +135,7 @@ do
 	RET=$?
 	result $RET "test-pluks-format-img${luksid}-${LUKSMAX}-${DDMODE}"
 	if [ $RET -ne 0 ];then
+		continue
 		return 0
 	fi
 
@@ -143,6 +144,7 @@ do
 	RET=$?
 	result $RET "test-pluks-open-img${luksid}-${LUKSMAX}-${DDMODE}"
 	if [ $RET -ne 0 ];then
+		continue
 		return 0
 	fi
 
