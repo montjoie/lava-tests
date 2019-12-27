@@ -121,7 +121,7 @@ esac
 for luksid in $(seq 1 $LUKSMAX)
 do
 	start_test "Generate fake image $luksid"
-	dd if=/dev/zero of=$OUTPUT_DIR/fake${luksid}.img bs=1M count=100
+	dd if=/dev/zero of=$OUTPUT_DIR/fake${luksid}.img bs=1M count=$DD_COUNT
 	RET=$?
 	result $RET "test-pluks-generate-img${luksid}-${LUKSMAX}-${DDMODE}"
 	if [ $RET -ne 0 ];then
@@ -220,6 +220,13 @@ do
 	rm $OUTPUT_DIR/fake${luksid}.img
 done
 }
+
+DD_COUNT=90
+MEMFREE=$(grep ^MemFree: /proc/meminfo |grep -o [0-9]*)
+if [ $MEMFREE -le 500000 ];then
+	DO_COUNT=65
+fi
+echo "DEBUG: MEMFREE=$MEMFREE DD_COUNT=$DD_COUNT"
 
 print_crypto_stat
 test_pluks 2
