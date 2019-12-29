@@ -30,6 +30,10 @@ try_remove() {
 				echo "DEBUG: fail to remove $module (ret=$RET)"
 			fi
 		done < $MODULES_LIST
+		echo "================================================"
+		echo "DEBUG: remaining modules"
+		lsmod
+		echo "================================================"
 		return 1
 	else
 		return 0
@@ -60,6 +64,7 @@ done
 
 for i in $(seq 1 10)
 do
+	echo "INFO: Removing modules step $i"
 	try_remove
 	if [ $? -eq 0 ];then
 		break
