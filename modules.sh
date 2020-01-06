@@ -19,6 +19,47 @@ try_remove() {
 				result SKIP "rmmod-$module"
 				continue
 			fi
+			echo $module | grep -qE 'thunderx2_pmu|arm_smmuv3_pmu|pcrypt'
+			if [ $? -eq 0 ];then
+				result SKIP "rmmod-$module"
+				continue
+			fi
+			echo $module | grep -qE 'nbd'
+			if [ $? -eq 0 ];then
+				echo "DEBUG: spetial hack for $module"
+				echo "#!/bin/sh
+					rmmod $module &
+					PID=\$!
+					wait \$PID
+					touch OUTPUT_DIR/rmmod.end
+				" > $OUTPUT_DIR/rmmod.sh
+				echo "===================="
+				cat $OUTPUT_DIR/rmmod.sh
+				echo "===================="
+				chmod +x $OUTPUT_DIR/rmmod.sh
+				$OUTPUT_DIR/rmmod.sh&
+				PID=$!
+				timeelapsed=0
+				while [ $timeelapsed -le 60 ]
+				do
+					if [ -e $OUTPUT_DIR/rmmod.end ];then
+						break
+					fi
+					sleep 1
+					timeelapsed=$(($timeelapsed+1))
+				done
+				if [ $timeelapsed -ge 60 ];then
+					kill $PID
+					echo "ERROR: rmmod $module timeout!"
+					RET=1
+					dmesg
+				else
+					RET=0
+					echo "DEBUG: rmmod exit ret=$RET after $timeelapsed seconds"
+				fi
+				result 1 "rmmod-$module"
+				continue
+			fi
 			echo "DEBUG: try $module"
 			rmmod $module
 			RET=$?
