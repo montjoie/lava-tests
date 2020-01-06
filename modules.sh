@@ -48,11 +48,12 @@ try_remove() {
 					sleep 1
 					timeelapsed=$(($timeelapsed+1))
 				done
-				if [ $timeelapsed -ge 60 ];then
+				if [ $timeelapsed -ge 120 ];then
 					kill $PID
 					echo "ERROR: rmmod $module timeout!"
 					RET=1
 					dmesg
+					ps aux
 				else
 					RET=0
 					echo "DEBUG: rmmod exit ret=$RET after $timeelapsed seconds"
