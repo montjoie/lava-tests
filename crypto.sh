@@ -89,6 +89,28 @@ else
 	result SKIP "crypto-RNG"
 fi
 
+# HWRNG tests
+
+if [ -e /sys/devices/virtual/misc/hw_random/ ];then
+	echo "==================== Found hwrng ==============="
+	cat /sys/devices/virtual/misc/hw_random/rng_available
+	cat /sys/devices/virtual/misc/hw_random/rng_current
+	cat /sys/devices/virtual/misc/hw_random/rng_selected
+	echo "================================================"
+fi
+
+if [ -e /dev/hwrng ];then
+	start_test "Check hwrng"
+	dd if=/dev/hwrng count=1 bs=512 > /dev/null
+	result $? "hwrng-simple"
+	rngtest -V
+	if [ $? -eq 0 ];then
+		start_test "Check hwrng with rngtest"
+		dd if=/dev/hwrng count=1 bs=512 | rngtest
+		result $? "hwrng-rngtest"
+	fi
+fi
+
 # check for some result
 # tcrypt generate error -2 for non-present algs
 start_test "Verify crypto errors"
