@@ -28,3 +28,5 @@ if [ $DRIVER = 'sun8i-ce-rng' ];then
 	fi
 #	echo "SEED" | kcapi-rng --name $DRIVER -b 6400000 | rngtest 
 fi
+
+rm $OUTPUT_DIR/rng.out
