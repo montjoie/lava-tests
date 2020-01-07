@@ -95,6 +95,7 @@ if [ -e /sys/devices/virtual/misc/hw_random/ ];then
 	echo "==================== Found hwrng ==============="
 	cat /sys/devices/virtual/misc/hw_random/rng_available
 	cat /sys/devices/virtual/misc/hw_random/rng_current
+	HWRNG_NAME="$(cat /sys/devices/virtual/misc/hw_random/rng_current | sed 's, ,_,g')"
 	cat /sys/devices/virtual/misc/hw_random/rng_selected
 	echo "================================================"
 fi
@@ -102,12 +103,12 @@ fi
 if [ -e /dev/hwrng ];then
 	start_test "Check hwrng"
 	dd if=/dev/hwrng count=1 bs=512 > /dev/null
-	result $? "hwrng-simple"
+	result $? "hwrng-simple-$HWRNG_NAME"
 	rngtest -V
 	if [ $? -eq 0 ];then
 		start_test "Check hwrng with rngtest"
-		dd if=/dev/hwrng count=100 bs=512 | rngtest
-		result $? "hwrng-rngtest"
+		dd if=/dev/hwrng count=100 bs=1024 | rngtest
+		result $? "hwrng-rngtest-$HWRNG_NAME"
 	fi
 fi
 

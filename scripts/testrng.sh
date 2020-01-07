@@ -15,7 +15,7 @@ if [ $DRIVER = 'sun8i-ss-rng' ];then
 	if [ $? -ne 0 ];then
 		exit 0
 	fi
-	#echo "SEED" | kcapi-rng --name $DRIVER -b 640000 | rngtest
+	echo "SEED" | kcapi-rng --name $DRIVER -b 640000 | rngtest
 fi
 
 if [ $DRIVER = 'sun8i-ce-rng' ];then
