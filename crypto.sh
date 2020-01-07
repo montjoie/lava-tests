@@ -25,7 +25,7 @@ do
 				scripts/testrng.sh $DRIVER $OUTPUT_DIR &
 				PID=$!
 				timeelapsed=0
-				while [ $timeelapsed -le 60 ]
+				while [ $timeelapsed -le 120 ]
 				do
 					if [ -e $OUTPUT_DIR/rng.ret ];then
 						break
@@ -33,7 +33,7 @@ do
 					sleep 1
 					timeelapsed=$(($timeelapsed+1))
 				done
-				if [ $timeelapsed -ge 60 ];then
+				if [ $timeelapsed -ge 120 ];then
 					kill $PID
 					echo "ERROR: RNG timeout!"
 					RET=1
@@ -106,7 +106,7 @@ if [ -e /dev/hwrng ];then
 	rngtest -V
 	if [ $? -eq 0 ];then
 		start_test "Check hwrng with rngtest"
-		dd if=/dev/hwrng count=1 bs=512 | rngtest
+		dd if=/dev/hwrng count=100 bs=512 | rngtest
 		result $? "hwrng-rngtest"
 	fi
 fi
