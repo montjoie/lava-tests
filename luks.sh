@@ -201,7 +201,18 @@ done
 	for luksid in $(seq 1 $LUKSMAX)
 	do
 		MD5=$(md5sum /mnt/luks${luksid}/test | cut -d' ' -f1)
-		if [ "$MD5" != '25e317773f308e446cc84c503a6d1f85' ];then
+		case $BDD_COUNT in
+		300)
+			GOOD_MD5="91e10548686e30b5ee4720cf20037247"
+		;;
+		250)
+			GOOD_MD5="unset"
+		;;
+		200)
+			GOOD_MD5="25e317773f308e446cc84c503a6d1f85"
+		;;
+		esac
+		if [ "$MD5" != "$GOOD_MD5" ];then
 			RET=1
 			echo "ERROR: invalid md5 ($MD5) for $luksid "
 		fi
