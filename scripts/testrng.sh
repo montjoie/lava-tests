@@ -3,43 +3,35 @@
 DRIVER=$1
 OUTPUT_DIR=$2
 echo "SEED" | kcapi-rng --name $DRIVER -b 64 > $OUTPUT_DIR/rng.out
-echo $? > $OUTPUT_DIR/rng.ret
+RET=$?
 
-if [ $DRIVER = 'sun4i_ss_rng' ];then
+test_rng_more() {
 	echo "SEED" | kcapi-rng --name $DRIVER -b 64 > $OUTPUT_DIR/rng.out
 	echo "SEED" | kcapi-rng --name $DRIVER -b 128 > $OUTPUT_DIR/rng.out
 	echo "SEED" | kcapi-rng --name $DRIVER -b 256 > $OUTPUT_DIR/rng.out
 	echo "SEED" | kcapi-rng --name $DRIVER -b 511 > $OUTPUT_DIR/rng.out
 	rngtest -V
 	if [ $? -ne 0 ];then
-		exit 0
+		return 0
+	fi
+	if [ $DRIVER = 'sun8i-ce-rng' ];then
+		return 0
 	fi
 	echo "SEED" | kcapi-rng --name $DRIVER -b 640000 | rngtest
-fi
+}
 
-if [ $DRIVER = 'sun8i-ss-rng' ];then
-	echo "SEED" | kcapi-rng --name $DRIVER -b 64 > $OUTPUT_DIR/rng.out
-	echo "SEED" | kcapi-rng --name $DRIVER -b 128 > $OUTPUT_DIR/rng.out
-	echo "SEED" | kcapi-rng --name $DRIVER -b 256 > $OUTPUT_DIR/rng.out
-	echo "SEED" | kcapi-rng --name $DRIVER -b 511 > $OUTPUT_DIR/rng.out
-	cat /sys/kernel/debug/clk/clk_summary
-	rngtest -V
-	if [ $? -ne 0 ];then
-		exit 0
-	fi
-	echo "SEED" | kcapi-rng --name $DRIVER -b 640000 | rngtest
-fi
+case $DRIVER in
+sun4i_ss_rng)
+	test_rng_more
+;;
+sun8i-ss-rng)
+	test_rng_more
+;;
+sun8i-ce-rng)
+	test_rng_more
+;;
+esac
 
-if [ $DRIVER = 'sun8i-ce-rng' ];then
-	echo "SEED" | kcapi-rng --name $DRIVER -b 64 > $OUTPUT_DIR/rng.out
-	echo "SEED" | kcapi-rng --name $DRIVER -b 128 > $OUTPUT_DIR/rng.out
-	echo "SEED" | kcapi-rng --name $DRIVER -b 256 > $OUTPUT_DIR/rng.out
-	echo "SEED" | kcapi-rng --name $DRIVER -b 511 > $OUTPUT_DIR/rng.out
-	rngtest -V
-	if [ $? -ne 0 ];then
-		exit 0
-	fi
-#	echo "SEED" | kcapi-rng --name $DRIVER -b 6400000 | rngtest 
-fi
+echo $RET > $OUTPUT_DIR/rng.ret
 
 rm $OUTPUT_DIR/rng.out
