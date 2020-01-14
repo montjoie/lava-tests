@@ -101,6 +101,15 @@ rm $OUTPUT_DIR/fake.img
 
 test_pluks()
 {
+DD_COUNT=100
+BDD_COUNT=300
+MEMFREE=$(grep ^MemFree: /proc/meminfo |grep -o [0-9]*)
+if [ $MEMFREE -le 500000 ];then
+	DO_COUNT=60
+	BDD_COUNT=250
+fi
+echo "DEBUG: MEMFREE=$MEMFREE DD_COUNT=$DD_COUNT"
+
 LUKSMAX=$1
 FLAG="oflag=sync"
 DDMODE="sync"
@@ -174,7 +183,7 @@ done
 	start_test "cryptsetup bench the disk in parallel on $LUKSMAX images mode=$DDMODE"
 	for luksid in $(seq 1 $LUKSMAX)
 	do
-		dd if=/dev/zero of=/mnt/luks${luksid}/test $FLAG bs=256k count=200 &
+		dd if=/dev/zero of=/mnt/luks${luksid}/test $FLAG bs=256k count=$BDD_COUNT &
 	done
 	wait
 	result $RET "test-pluks-bench-${LUKSMAX}-${DDMODE}"
@@ -182,7 +191,7 @@ done
 	start_test "cryptsetup readbench the disk in parallel on $LUKSMAX images mode=$DDMODE"
 	for luksid in $(seq 1 $LUKSMAX)
 	do
-		dd if=/mnt/luks${luksid}/test of=/dev/null $FLAG bs=256k count=200 &
+		dd if=/mnt/luks${luksid}/test of=/dev/null $FLAG bs=256k count=$BDD_COUNT &
 	done
 	wait
 	result $RET "test-pluks-readbench-${LUKSMAX}-${DDMODE}"
@@ -220,13 +229,6 @@ do
 	rm $OUTPUT_DIR/fake${luksid}.img
 done
 }
-
-DD_COUNT=90
-MEMFREE=$(grep ^MemFree: /proc/meminfo |grep -o [0-9]*)
-if [ $MEMFREE -le 500000 ];then
-	DO_COUNT=65
-fi
-echo "DEBUG: MEMFREE=$MEMFREE DD_COUNT=$DD_COUNT"
 
 print_crypto_stat
 test_pluks 2
