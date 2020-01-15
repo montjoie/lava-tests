@@ -108,7 +108,10 @@ if [ -e /dev/hwrng ];then
 	if [ $? -eq 0 ];then
 		start_test "Check hwrng with rngtest"
 		dd if=/dev/hwrng count=100 bs=1024 | rngtest
-		result $? "hwrng-rngtest-$HWRNG_NAME"
+		result $? "hwrng-rngtest1-$HWRNG_NAME"
+		start_test "Check hwrng with rngtest"
+		dd if=/dev/hwrng count=100 bs=2048 | rngtest
+		result $? "hwrng-rngtest2-$HWRNG_NAME"
 	fi
 fi
 
