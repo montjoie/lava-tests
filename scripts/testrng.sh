@@ -14,7 +14,7 @@ test_rng_more() {
 	if [ $? -ne 0 ];then
 		return 0
 	fi
-	echo "SEED" | kcapi-rng --name $DRIVER -b 640000 | rngtest
+	echo "SEED" | kcapi-rng --name $DRIVER -b 960000 | rngtest
 }
 
 case $DRIVER in
