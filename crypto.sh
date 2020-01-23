@@ -100,8 +100,8 @@ if [ -e /sys/devices/virtual/misc/hw_random/ ];then
 	echo "================================================"
 fi
 
-if [ -e /dev/hwrng ];then
-	start_test "Check hwrng"
+if [ -e /dev/hwrng -a "$HWRNG_NAME" != 'none' ];then
+	start_test "Check hwrng $HWRNG_NAME"
 	dd if=/dev/hwrng count=1 bs=512 > /dev/null
 	result $? "hwrng-simple-$HWRNG_NAME"
 	rngtest -V
