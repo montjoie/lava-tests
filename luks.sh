@@ -18,6 +18,14 @@ if [ $? -ne 0 ];then
 	exit 0
 fi
 
+MEMFREE=$(grep ^MemFree: /proc/meminfo |grep -o [0-9]*)
+MEMTOTAL=$(grep ^MemTotal: /proc/meminfo |grep -o [0-9]*)
+echo "DEBUG: $MEMFREE $MEMTOTAL"
+if [ $MEMTOTAL -le 600000 ];then
+	echo "SKIP: cannot ran cryptsetup due to low memory"
+	exit 0
+fi
+
 start_test "cryptsetup benchmark"
 cryptsetup benchmark > $OUTPUT_DIR/cryptsetup-benchmark
 result $RET "test-luks-cryptsetup-benchmark"
