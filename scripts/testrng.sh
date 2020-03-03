@@ -27,6 +27,12 @@ sun8i-ss-rng)
 sun8i-ce-rng)
 	test_rng_more
 ;;
+sun8i-ss-prng)
+	test_rng_more
+;;
+sun8i-ce-prng)
+	test_rng_more
+;;
 esac
 
 echo $RET > $OUTPUT_DIR/rng.ret
