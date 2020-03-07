@@ -59,7 +59,8 @@ print_crypto_stat
 
 # for all crypto algorithm to load by testing them via the tcrypt module
 start_test "Test kernel crypto via the tcrypt module"
-modprobe tcrypt 2> $OUTPUT_DIR/tcrypt.err
+#modprobe tcrypt 2> $OUTPUT_DIR/tcrypt.err
+try_run "modprobe tcrypt" 2> $OUTPUT_DIR/tcrypt.err
 RET=$?
 cat $OUTPUT_DIR/tcrypt.err
 if [ $RET -eq 0 ];then

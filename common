@@ -162,3 +162,40 @@ print_crypto_stat()
 	find /sys/kernel/debug/ |grep -i caam
 	echo "DEBUG: end of stats"
 }
+
+try_run()
+{
+	echo "#!/bin/sh
+	$* &
+	PID=\$!
+	wait \$PID
+	echo $? > $OUTPUT_DIR/try.end
+	" > $OUTPUT_DIR/try.sh
+	echo "DEBUG: ===================="
+	cat $OUTPUT_DIR/try.sh
+	echo "DEBUG: ===================="
+	chmod +x $OUTPUT_DIR/try.sh
+	$OUTPUT_DIR/try.sh&
+	PID=$!
+
+	TIMEOUT=120
+	timeelapsed=0
+	while [ $timeelapsed -le $TIMEOUT ]
+	do
+		if [ -e $OUTPUT_DIR/try.end ];then
+			break
+		fi
+		sleep 1
+		timeelapsed=$(($timeelapsed+1))
+	done
+	if [ $timeelapsed -ge $TIMEOUT ];then
+		kill $PID
+		echo "ERROR: try $* timeout!"
+		RET=1
+		dmesg
+	else
+		RET=$(cat $OUTPUT_DIR/try.end)
+		echo "DEBUG: try exit ret=$RET after $timeelapsed seconds"
+	fi
+	return $RET
+}
