@@ -169,8 +169,8 @@ try_run()
 	echo "#!/bin/sh
 	$*
 	RET=\$?
-	echo $RET > $OUTPUT_DIR/try.end
-	exit $RET
+	echo \$RET > $OUTPUT_DIR/try.end
+	exit \$RET
 	" > $OUTPUT_DIR/try.sh
 	chmod +x $OUTPUT_DIR/try.sh
 
