@@ -166,15 +166,17 @@ print_crypto_stat()
 try_run()
 {
 	echo "#!/bin/sh
-	$* &
-	PID=\$!
-	wait \$PID
-	echo $? > $OUTPUT_DIR/try.end
+	$*
+	RET=$?
+	echo $RET > $OUTPUT_DIR/try.end
+	exit $RET
 	" > $OUTPUT_DIR/try.sh
+	chmod +x $OUTPUT_DIR/try.sh
+
 	echo "DEBUG: ===================="
 	cat $OUTPUT_DIR/try.sh
 	echo "DEBUG: ===================="
-	chmod +x $OUTPUT_DIR/try.sh
+
 	$OUTPUT_DIR/try.sh&
 	PID=$!
 
