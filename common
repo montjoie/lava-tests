@@ -167,7 +167,7 @@ try_run()
 {
 	echo "#!/bin/sh
 	$*
-	RET=$?
+	RET=\$?
 	echo $RET > $OUTPUT_DIR/try.end
 	exit $RET
 	" > $OUTPUT_DIR/try.sh
