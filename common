@@ -165,6 +165,7 @@ print_crypto_stat()
 
 try_run()
 {
+	rm -f $OUTPUT_DIR/try.end
 	echo "#!/bin/sh
 	$*
 	RET=\$?
