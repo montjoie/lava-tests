@@ -27,7 +27,7 @@ if [ $MEMTOTAL -le 600000 ];then
 fi
 
 start_test "cryptsetup benchmark"
-cryptsetup benchmark > $OUTPUT_DIR/cryptsetup-benchmark
+try_run cryptsetup benchmark > $OUTPUT_DIR/cryptsetup-benchmark
 result $RET "test-luks-cryptsetup-benchmark"
 cat $OUTPUT_DIR/cryptsetup-benchmark
 #TODO analysis of output
