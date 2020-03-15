@@ -196,6 +196,7 @@ try_run()
 		echo "ERROR: try $* timeout!"
 		RET=1
 		dmesg
+		ps aux
 	else
 		RET=$(cat $OUTPUT_DIR/try.end)
 		echo "DEBUG: try exit ret=$RET after $timeelapsed seconds"
