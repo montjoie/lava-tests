@@ -192,11 +192,11 @@ try_run()
 		timeelapsed=$(($timeelapsed+1))
 	done
 	if [ $timeelapsed -ge $TIMEOUT ];then
-		kill $PID
 		echo "ERROR: try $* timeout!"
 		RET=1
 		dmesg
 		ps aux
+		kill $PID
 	else
 		RET=$(cat $OUTPUT_DIR/try.end)
 		echo "DEBUG: try exit ret=$RET after $timeelapsed seconds"
