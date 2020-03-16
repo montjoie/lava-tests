@@ -29,7 +29,9 @@ fi
 start_test "cryptsetup benchmark"
 try_run cryptsetup benchmark > $OUTPUT_DIR/cryptsetup-benchmark
 result $RET "test-luks-cryptsetup-benchmark"
+echo "DEBUG: output ============================"
 cat $OUTPUT_DIR/cryptsetup-benchmark
+echo "DEBUG: endout ============================"
 #TODO analysis of output
 
 start_test "Generate fake image"
