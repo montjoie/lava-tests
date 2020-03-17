@@ -19,7 +19,11 @@ check_loglevel() {
 	fi
 	if [ -s $OUTPUT_DIR/dmesg.${loglevel} ];then
 		echo "DEBUG: Got something from ${loglevel}"
-		grep -vE 'urandom_read: [0-9]* callbacks suppressed|module is from the staging directory' $OUTPUT_DIR/dmesg.${loglevel} > $OUTPUT_DIR/dmesg.${loglevel}.filter
+		if [ -e "logignore/common/${loglevel}" ];then
+			grep -v -f logignore/common/${loglevel} $OUTPUT_DIR/dmesg.${loglevel} > $OUTPUT_DIR/dmesg.${loglevel}.filter
+		else
+			cat $OUTPUT_DIR/dmesg.${loglevel} > $OUTPUT_DIR/dmesg.${loglevel}.filter
+		fi
 		# now try per board filter
 		if [ -e "logignore/$MACHINE_MODEL_/${loglevel}" ];then
 			echo "DEBUG: found filter for $MACHINE_MODEL_ ${loglevel}"

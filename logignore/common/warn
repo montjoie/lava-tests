@@ -1,0 +1,3 @@
+alg: extra crypto tests enabled.  This is intended for developer use only.
+urandom_read: [0-9]* callbacks suppressed
+module is from the staging directory
