@@ -2,6 +2,15 @@
 
 . ./common
 
+start_test "Get machine model"
+get_machine_model
+if [ -z "$MACHINE_MODEL_" ];then
+	result FAIL get-machine-model
+else
+	echo "DEBUG: Run on $MACHINE_MODEL_"
+	result 0 get-machine-model
+fi
+
 check_loglevel() {
 	dmesg --level $loglevel > $OUTPUT_DIR/dmesg.${loglevel}
 	if [ $? -ne 0 ];then
@@ -133,15 +142,6 @@ do
 	done < list
 done
 echo "==DRIVER_DUMP_END=="
-
-start_test "Get machine model"
-get_machine_model
-if [ -z "$MACHINE_MODEL_" ];then
-	result FAIL get-machine-model
-else
-	echo "DEBUG: Run on $MACHINE_MODEL_"
-	result 0 get-machine-model
-fi
 
 echo "DEBUG: avallable firmware on the rootfs"
 find /lib/firmware -type f
