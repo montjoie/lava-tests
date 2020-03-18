@@ -5,16 +5,23 @@ axp20x-battery-power-supply axp20x-battery-power-supply: DMA mask not set
 axp20x-ac-power-supply axp20x-ac-power-supply: DMA mask not set
 axp20x-usb-power-supply axp20x-usb-power-supply: DMA mask not set
 ac100-rtc ac100-rtc: DMA mask not set
+sun8i-a83t-pinctrl 1c20800.pinctrl: supply vcc-pb not found, using dummy regulator
+sun8i-a83t-pinctrl 1c20800.pinctrl: supply vcc-pg not found, using dummy regulator
+sun8i-a83t-pinctrl 1c20800.pinctrl: supply vcc-pf not found, using dummy regulator
+sun8i-a83t-pinctrl 1c20800.pinctrl: supply vcc-pc not found, using dummy regulator
+sun8i-a83t-pinctrl 1c20800.pinctrl: supply vcc-ph not found, using dummy regulator
 sun8i-a83t-pinctrl 1c20800.pinctrl: 1c20800.pinctrl supply vcc-pb not found, using dummy regulator
 sun8i-a83t-pinctrl 1c20800.pinctrl: 1c20800.pinctrl supply vcc-pg not found, using dummy regulator
 sun8i-a83t-pinctrl 1c20800.pinctrl: 1c20800.pinctrl supply vcc-pf not found, using dummy regulator
 sun8i-a83t-pinctrl 1c20800.pinctrl: 1c20800.pinctrl supply vcc-pc not found, using dummy regulator
 sun8i-a83t-pinctrl 1c20800.pinctrl: 1c20800.pinctrl supply vcc-ph not found, using dummy regulator
+sun8i-a83t-r-pinctrl 1f02c00.pinctrl: supply vcc-pl not found, using dummy regulator
 mmc0: host does not support reading read-only switch, assuming write-enable
 mmc1: queuing unknown CIS tuple 0x80 (2 bytes)
 mmc1: queuing unknown CIS tuple 0x80 (3 bytes)
 mmc1: queuing unknown CIS tuple 0x80 (7 bytes)
 usb_phy_generic usb_phy_generic.0.auto: usb_phy_generic.0.auto supply vcc not found, using dummy regulator
+usb_phy_generic usb_phy_generic.0.auto: supply vcc not found, using dummy regulator
 dwmac-sun8i 1c30000.ethernet: PTP uses main clock
 dwmac-sun8i 1c30000.ethernet: Current syscon value is not the default 1ce6 (expect 0)
 dwmac-sun8i 1c30000.ethernet eth0: PTP not supported by HW
