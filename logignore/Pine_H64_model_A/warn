@@ -1,0 +1,8 @@
+sun50i-h6-r-pinctrl 7022000.pinctrl: supply vcc-pl not found, using dummy regulator
+sun50i-h6-pinctrl 300b000.pinctrl: supply vcc-ph not found, using dummy regulator
+sun50i-h6-pinctrl 300b000.pinctrl: supply vcc-pf not found, using dummy regulator
+usb_phy_generic usb_phy_generic.1.auto: supply vcc not found, using dummy regulator
+mmc0: host does not support reading read-only switch, assuming write-enable
+dwmac-sun8i 5020000.ethernet: Current syscon value is not the default 58000 (expect 50000)
+dwmac-sun8i 5020000.ethernet eth0: PTP not supported by HW
+nfs: Deprecated parameter 'intr'

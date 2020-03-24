@@ -1,0 +1,8 @@
+sun8i-h3-pinctrl 1c20800.pinctrl: supply vcc-pa not found, using dummy regulator
+sun8i-h3-pinctrl 1c20800.pinctrl: supply vcc-pf not found, using dummy regulator
+sun8i-h3-pinctrl 1c20800.pinctrl: supply vcc-pg not found, using dummy regulator
+sun8i-h3-r-pinctrl 1f02c00.pinctrl: supply vcc-pl not found, using dummy regulator
+mmc0: host does not support reading read-only switch, assuming write-enable
+usb_phy_generic usb_phy_generic.1.auto: supply vcc not found, using dummy regulator
+dwmac-sun8i 1c30000.ethernet: Current syscon value is not the default 148000 (expect 58000)
+dwmac-sun8i 1c30000.ethernet eth0: PTP not supported by HW
