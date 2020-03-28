@@ -1,0 +1,10 @@
+metadata:
+  name: Montjoie tests
+  format: "Lava-Test-Shell Test Definition 1.0"
+  description: "Montjoie test"
+  version: 1.0
+run:
+    steps:
+      - echo "Distcc tests"
+      - chmod +x ./distcc.sh
+      - ./distcc.sh
