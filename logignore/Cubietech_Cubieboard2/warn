@@ -1,0 +1,12 @@
+sun4i-pinctrl 1c20800.pinctrl: supply vcc-pb not found, using dummy regulator
+ahci-sunxi 1c18000.sata: supply ahci not found, using dummy regulator
+ahci-sunxi 1c18000.sata: supply phy not found, using dummy regulator
+sun4i-pinctrl 1c20800.pinctrl: supply vcc-pa not found, using dummy regulator
+sun4i-pinctrl 1c20800.pinctrl: supply vcc-pf not found, using dummy regulator
+sun4i-pinctrl 1c20800.pinctrl: supply vcc-ph not found, using dummy regulator
+mmc0: host does not support reading read-only switch, assuming write-enable
+ahci-sunxi 1c18000.sata: supply ahci not found, using dummy regulator
+ahci-sunxi 1c18000.sata: supply phy not found, using dummy regulator
+usb_phy_generic usb_phy_generic.0.auto: supply vcc not found, using dummy regulator
+sun7i-dwmac 1c50000.ethernet eth0: RX IPC Checksum Offload disabled
+sun7i-dwmac 1c50000.ethernet eth0: PTP not supported by HW
