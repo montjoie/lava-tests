@@ -1,0 +1,4 @@
+lima 1c40000.gpu: IRQ ppmmu2 not found
+lima 1c40000.gpu: IRQ ppmmu3 not found
+lima 1c40000.gpu: IRQ pp2 not found
+lima 1c40000.gpu: IRQ pp3 not found
