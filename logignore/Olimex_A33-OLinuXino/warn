@@ -1,0 +1,7 @@
+sun8i-a33-pinctrl 1c20800.pinctrl: supply vcc-pb not found, using dummy regulator
+sun8i-a33-pinctrl 1c20800.pinctrl: supply vcc-pf not found, using dummy regulator
+sun8i-a33-pinctrl 1c20800.pinctrl: supply vcc-pf not found, using dummy regulator
+sun8i-a23-r-pinctrl 1f02c00.pinctrl: supply vcc-pl not found, using dummy regulator
+usb_phy_generic usb_phy_generic.1.auto: supply vcc not found, using dummy regulator
+sun8i-a33-pinctrl 1c20800.pinctrl: supply vcc-pf not found, using dummy regulator
+mmc0: host does not support reading read-only switch, assuming write-enable
