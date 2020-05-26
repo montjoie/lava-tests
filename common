@@ -127,7 +127,7 @@ get_machine_model() {
 		echo "DEBUG: got machinemodel from MM"
 	fi
 	MACHINE_MODEL=$(cat $OUTPUT_DIR/machinemodel)
-	MACHINE_MODEL_=$(cat $OUTPUT_DIR/machinemodel | sed 's,[[:space:]],_,g')
+	MACHINE_MODEL_=$(cat $OUTPUT_DIR/machinemodel | sed 's,[[:space:]],_,g' | sed 's,/,_,g')
 	echo "===MACHINEMODEL==="
 	echo $MACHINE_MODEL_
 	echo "===MACHINEMODEL_END==="
