@@ -1,6 +1,6 @@
 #!/bin/sh
 
-grep -q ' nfs ' /proc/mount
+grep -q ' nfs ' /proc/mounts
 if [ $? -eq 0 ];then
 	echo "DEBUG: nfs detected, skipping ipsec test"
 	exit 0
@@ -11,7 +11,7 @@ DST=iperf.lava.local
 LOCAL=10.7.0.2
 REMOTE=10.7.0.1
 
-if [ "$1" == 'server'] ;then
+if [ "$1" == 'server' ] ;then
 	ID=$(cat keys/ipsec.id)
 	KEY1=$(cat keys/ipsec1.key)
 	KEY2=$(cat keys/ipsec2.key)
