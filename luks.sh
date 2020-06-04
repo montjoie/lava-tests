@@ -18,6 +18,14 @@ if [ $? -ne 0 ];then
 	exit 0
 fi
 
+start_test "Modprobe loop"
+modprobe loop
+if [ $? -ne 0 ];then
+	result SKIP "test-luks-modprobe-loop"
+else
+	result PASS "test-luks-modprobe-loop"
+fi
+
 MEMFREE=$(grep ^MemFree: /proc/meminfo |grep -o [0-9]*)
 MEMTOTAL=$(grep ^MemTotal: /proc/meminfo |grep -o [0-9]*)
 echo "DEBUG: $MEMFREE $MEMTOTAL"
