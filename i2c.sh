@@ -23,4 +23,15 @@ do
 	start_test "Dump I2C bus $i"
 	i2cdetect -y $i | tee $OUTPUT_DIR/i2c-${i}.dump
 	result $? "test-i2c-dump-$i"
+
+	i2cdetect -y $i | grep ^[0-9] | cut -d' ' -f2- |grep -o [0-9][0-9a-f] |
+	while read address
+	do
+		start_test "Dump I2C bus $i address $address"
+		i2cget -f -y $i 0x$address 0
+		result $? "test-i2c-get-$i-$address"
+		#start_test "Dump I2C bus $i address $address"
+		i2cget -f -y $i 0x$address i
+		#result $? "test-i2c-get-$i-$address"
+	done
 done
