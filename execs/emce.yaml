@@ -1,0 +1,12 @@
+metadata:
+  name: Montjoie tests
+  format: "Lava-Test-Shell Test Definition 1.0"
+  description: "Montjoie test"
+  version: 1.0
+run:
+    steps:
+      - echo "EMCE tests"
+      - lava-test-set start test-emce
+      - chmod +x ./emce.sh
+      - ./emce.sh
+      - lava-test-set stop test-emce
