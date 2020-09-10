@@ -152,7 +152,7 @@ print_crypto_stat()
 {
 	echo "DEBUG: check for crypto stats"
 	mount -t debugfs none /sys/kernel/debug
-	for dirstat in gxl-crypto amlogic-crypto sun8i-ce sun8i-ss
+	for dirstat in gxl-crypto amlogic-crypto sun8i-ce sun8i-ss sun4i-ss
 	do
 		echo "DEBUG: test cryptostat $dirstat"
 		if [ -e /sys/kernel/debug/$dirstat/stats ];then
