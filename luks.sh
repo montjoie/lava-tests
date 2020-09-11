@@ -54,7 +54,7 @@ fi
 echo 'toto' >$OUTPUT_DIR/fake.key
 
 start_test "crytpsetup format"
-cryptsetup --key-file=$OUTPUT_DIR/fake.key --batch-mode luksFormat $OUTPUT_DIR/fake.img
+cryptsetup --verbose --key-file=$OUTPUT_DIR/fake.key --batch-mode luksFormat $OUTPUT_DIR/fake.img
 RET=$?
 result $RET "test-luks-format-img"
 if [ $RET -ne 0 ];then
@@ -62,7 +62,7 @@ if [ $RET -ne 0 ];then
 fi
 
 start_test "crytpsetup open"
-cryptsetup --key-file=$OUTPUT_DIR/fake.key --batch-mode luksOpen $OUTPUT_DIR/fake.img fake
+cryptsetup --verbose --key-file=$OUTPUT_DIR/fake.key --batch-mode luksOpen $OUTPUT_DIR/fake.img fake
 RET=$?
 result $RET "test-luks-open"
 if [ $RET -ne 0 ];then
