@@ -128,6 +128,10 @@ fi
 
 print_crypto_stat
 
+echo "=== DUMP /proc/crypto ==="
+cat /proc/crypto
+echo "=== END DUMP ==="
+
 while read line
 do
 	SECTION=$(echo $line |cut -d' ' -f1)
