@@ -119,7 +119,7 @@ fi
 # check for some result
 # tcrypt generate error -2 for non-present algs
 start_test "Verify crypto errors"
-dmesg | grep -vE 'is unavailable$|[[:space:]]-2$|This is intended for developer use only' |grep alg:
+dmesg | grep -vE 'is unavailable$|[[:space:]]-2$|This is intended for developer use only|alg: No test for stdrng' |grep alg:
 if [ $? -eq 0 ];then
 	result 1 "crypto-error-log"
 else
