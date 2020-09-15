@@ -10,6 +10,14 @@ check_config CRYPTO_XTS
 if [ $? -ne 0 ];then
 	echo "DEBUG: Missing CONFIG_XTS"
 fi
+check_config CONFIG_CRYPTO_USER_API_SKCIPHER
+if [ $? -ne 0 ];then
+	echo "DEBUG: Missing CONFIG_CRYPTO_USER_API_SKCIPHER"
+fi
+check_config CONFIG_CRYPTO_USER_API_HASH
+if [ $? -ne 0 ];then
+	echo "DEBUG: Missing CONFIG_CRYPTO_USER_API_HASH"
+fi
 
 start_test "Check presence of cryptsetup"
 cryptsetup --version
@@ -157,12 +165,11 @@ do
 
 	echo "key$luksid" >$OUTPUT_DIR/fake${luksid}.key
 
-	start_test "crytpsetup format image$luksid"
-	cryptsetup --key-file=$OUTPUT_DIR/fake${luksid}.key --batch-mode $CREATE_OPTS luksFormat $OUTPUT_DIR/fake${luksid}.img
+	start_test "crytpsetup format image$luksid/$LUKSMAX with $CREATE_OPTS"
+	cryptsetup --debug --verbose --key-file=$OUTPUT_DIR/fake${luksid}.key --batch-mode $CREATE_OPTS luksFormat $OUTPUT_DIR/fake${luksid}.img
 	RET=$?
 	result $RET "test-pluks-format-img${luksid}-${LUKSMAX}-${DDMODE}"
 	if [ $RET -ne 0 ];then
-		continue
 		return 0
 	fi
 
