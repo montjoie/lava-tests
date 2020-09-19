@@ -60,16 +60,18 @@ print_crypto_stat
 # for all crypto algorithm to load by testing them via the tcrypt module
 start_test "Test kernel crypto via the tcrypt module"
 #modprobe tcrypt 2> $OUTPUT_DIR/tcrypt.err
-try_run "modprobe tcrypt" 2> $OUTPUT_DIR/tcrypt.err
+try_run -t 180 "modprobe tcrypt" 2> $OUTPUT_DIR/tcrypt.err
 RET=$?
 cat $OUTPUT_DIR/tcrypt.err
 if [ $RET -eq 0 ];then
-	# never happen
+	# should never happen in classic testing (non-FIPS)
+	# TODO test for FIPS mode
 	echo "WARN: should not happen"
 	result 0 "crypto-tcrypt"
 else
 	if [ $RET -eq 1 ];then
 		# normal case, check error message
+		# by default tcrypt return EAGAIN in non-FIPS mode
 		grep -q 'Resource temporarily unavailable' $OUTPUT_DIR/tcrypt.err
 		if [ $? -eq 0 ];then
 			echo "DEBUG: tcrypt real success"

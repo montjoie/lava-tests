@@ -165,6 +165,12 @@ print_crypto_stat()
 
 try_run()
 {
+	TIMEOUT=120
+	if [ "$1" == '-t' ];then
+		shift
+		TIMEOUT=$1
+		shift
+	fi
 	rm -f $OUTPUT_DIR/try.end
 	echo "#!/bin/sh
 	$*
@@ -181,7 +187,6 @@ try_run()
 	$OUTPUT_DIR/try.sh&
 	PID=$!
 
-	TIMEOUT=120
 	timeelapsed=0
 	while [ $timeelapsed -le $TIMEOUT ]
 	do
