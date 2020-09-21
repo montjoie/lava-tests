@@ -267,7 +267,7 @@ do
 	echo "key$luksid" >$OUTPUT_DIR/fake${luksid}.key
 
 	start_test "crytpsetup format image$luksid/$LUKSMAX with $CREATE_OPTS"
-	cryptsetup --debug --verbose --key-file=$OUTPUT_DIR/fake${luksid}.key --batch-mode $CREATE_OPTS luksFormat $OUTPUT_DIR/fake${luksid}.img
+	cryptsetup --verbose --key-file=$OUTPUT_DIR/fake${luksid}.key --batch-mode $CREATE_OPTS luksFormat $OUTPUT_DIR/fake${luksid}.img
 	RET=$?
 	result $RET "test-pluks-format-img${luksid}-${LUKSMAX}-${DDMODE}"
 	if [ $RET -ne 0 ];then
