@@ -2,8 +2,8 @@
 
 . ./common
 
-dmesg > $OUTPUT_DIR/dmesg.start
-date +%s > $OUTPUT_DIR/timestamp.start
+dmesg > "$OUTPUT_DIR/dmesg.start"
+date +%s > "$OUTPUT_DIR/timestamp.start"
 
 exit 0
 
