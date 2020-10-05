@@ -154,9 +154,9 @@ fi
 
 print_crypto_stat
 
-echo "=== DUMP /proc/crypto ==="
-cat /proc/crypto
-echo "=== END DUMP ==="
+#echo "=== DUMP /proc/crypto ==="
+#cat /proc/crypto
+#echo "=== END DUMP ==="
 
 # verify each algorithm if thet pass or fail selftests
 while read -r line
