@@ -6,7 +6,7 @@ echo "======================================================"
 mount
 echo "======================================================"
 
-if [ -z $PORTAGE_URL ];then
+if [ -z "$PORTAGE_URL" ];then
 	PORTAGE_URL="$2"
 	echo "DEBUG: get PORTAGE_URL from parameter"
 fi
@@ -16,8 +16,9 @@ export http_proxy=192.168.1.40:3128
 start_test "download portage"
 #wget -q http://gentoo.mirrors.ovh.net/gentoo-distfiles/snapshots/portage-latest.tar.bz2
 #wget -q http://boot.montjoie.local/portage-minimal.tar.bz2
-wget -q $PORTAGE_URL
-if [ $? -ne 0 ];then
+wget -q "$PORTAGE_URL"
+RET=$?
+if [ $RET -ne 0 ];then
 	result FAIL "test-download-portage"
 	exit 0
 fi
@@ -34,7 +35,8 @@ fi
 start_test "extract portage"
 #tar xjf portage-latest.tar.bz2 -C /usr/ --wildcards '*net-fs/nfs-utils*' '*net-libs/libtirpc*' '*net-nds/rpcbind*' '*sys-apps/keyutils*' '*eclass/*' '*metadata/*' '*profiles/*'
 tar xjf portage-minimal.tar.bz2 -C $T_PORTAGE_DIR 2>/dev/null >/dev/null
-if [ $? -ne 0 ];then
+RET=$?
+if [ $RET -ne 0 ];then
 	result FAIL "test-extract-portage"
 	exit 0
 fi
@@ -51,8 +53,9 @@ echo "DEBUG: prepare portage"
 echo 'USE="-X -nls -acl -thin -btrfs -device-mapper -sodium -fortran -openmp -bindist"' >> /etc/portage/make.conf
 #echo 'FEATURES="-distlocks noman nodoc"' >> /etc/portage/make.conf
 echo 'FEATURES="noman nodoc"' >> /etc/portage/make.conf
+# TODO un-hardcode thos
 echo "http_proxy=192.168.1.40:3128" >> /etc/portage/make.conf
-echo "MAKEOPTS=-j$(grep processor /proc/cpuinfo | wc -l)" >> /etc/portage/make.conf
+echo "MAKEOPTS=-j$(grep --count processor /proc/cpuinfo)" >> /etc/portage/make.conf
 echo 'PORTDIR_OVERLAY="/usr/local/portage"' >> /etc/portage/make.conf
 
 echo "======================================================"
@@ -96,7 +99,8 @@ result $? "test-gentoo-emerge-info"
 
 start_test "Install nfs-utils"
 emerge --nospinner --quiet --color n -v nfs-utils
-if [ $? -ne 0 ];then
+RET=$?
+if [ $RET -ne 0 ];then
 	result FAIL "test-gentoo-install-nfs-utils"
 	exit 0
 fi
@@ -104,7 +108,8 @@ result 0 "test-gentoo-install-nfs-utils"
 
 start_test "mount portage"
 mount -t nfs -o ro,tcp,hard,intr,async,vers=3 192.168.1.100:/usr/portage/ /usr//portage/
-if [ $? -ne 0 ];then
+RET=$?
+if [ $RET -ne 0 ];then
 	result FAIL "test-mount-portage"
 	exit 0
 fi
@@ -112,7 +117,8 @@ result 0 "test-mount-portage"
 
 start_test "mount local portage"
 mount -t nfs -o ro,tcp,hard,intr,async,vers=3 192.168.1.100:/usr/local/portage/ /usr/local/portage/
-if [ $? -ne 0 ];then
+RET=$?
+if [ $RET -ne 0 ];then
 	result FAIL "test-mount-local-portage"
 	exit 0
 fi
@@ -120,15 +126,17 @@ result 0 "test-mount-local-portage"
 
 start_test "mount portage distfiles"
 mount -t nfs -o rw,tcp,hard,intr,async,vers=3 192.168.1.100:/mnt/tempo/portages/distfiles/ /usr/portage/distfiles/
-if [ $? -ne 0 ];then
+RET=$?
+if [ $RET -ne 0 ];then
 	result FAIL "test-mount-portage-distfiles"
 	exit 0
 fi
 result 0 "test-mount-portage-distfiles"
 
 start_test "mount portage packages"
-mount -t nfs -o rw,tcp,hard,intr,async,vers=3 192.168.1.100:/mnt/tempo/portages/$(uname -m)/packages/ /usr/portage/packages/
-if [ $? -ne 0 ];then
+mount -t nfs -o rw,tcp,hard,intr,async,vers=3 "192.168.1.100:/mnt/tempo/portages/$(uname -m)/packages/" /usr/portage/packages/
+RET=$?
+if [ $RET -ne 0 ];then
 	result FAIL "test-mount-portage-packages"
 	exit 0
 fi
@@ -136,7 +144,8 @@ result 0 "test-mount-portage-packages"
 
 start_test "Install ethtool"
 emerge --nospinner --quiet --color n -v ethtool
-if [ $? -ne 0 ];then
+RET=$?
+if [ $RET -ne 0 ];then
 	result FAIL "test-gentoo-install-ethtool"
 	exit 0
 fi
@@ -144,7 +153,8 @@ result 0 "test-gentoo-install-ethtool"
 
 start_test "Install cfengine"
 USE="yaml" emerge --nospinner --quiet --color n -v cfengine
-if [ $? -ne 0 ];then
+RET=$?
+if [ $RET -ne 0 ];then
 	result FAIL "test-gentoo-install-cfengine"
 	exit 0
 fi
