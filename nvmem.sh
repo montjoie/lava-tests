@@ -11,26 +11,27 @@ find /sys/ -iname eeprom -type f
 find /sys/ -iname nvmem -type f
 
 find /sys/ -iname eeprom -type f |
-while read eefile
+while read -r eefile
 do
-	NAME=$(echo $eefile | sed 's,/eeprom$,,' | sed 's,.*/,,')
+	NAME=$(echo "$eefile" | sed 's,/eeprom$,,' | sed 's,.*/,,')
 	start_test "Dump EEPROM $NAME"
-	hexdump -C $eefile
+	hexdump -C "$eefile"
 	result $? "eeprom-$NAME"
 done
 
 find /sys/ -iname nvmem -type f |
-while read nvmemfile
+while read -r nvmemfile
 do
-	NAME=$(echo $nvmemfile | sed 's,/nvmem$,,' | sed 's,.*/,,')
+	NAME=$(echo "$nvmemfile" | sed 's,/nvmem$,,' | sed 's,.*/,,')
 	start_test "Dump NVMEM $NAME"
 	grep -qE 'QEMU-sparc64'  $OUTPUT_DIR/machinemodel
-	if [ $? -eq 0 ];then
+	RET=$?
+	if [ $RET -eq 0 ];then
 		echo "DEBUG: skip due to qemu crash"
 		result SKIP "nvmem-$NAME"
 		continue
 	fi
-	hexdump -C $nvmemfile
+	hexdump -C "$nvmemfile"
 	result $? "nvmem-$NAME"
 	# TODO sunxi-sid test of first values
 done
