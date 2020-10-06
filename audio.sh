@@ -6,10 +6,10 @@ TEST_PREFIX="audio-"
 if [ -e /lib/modules ];then
 	# try to load all sound modules
 	find /lib/modules -type f |grep kernel/sound | sed 's,.*/,,' |
-	while read sound_module
+	while read -r sound_module
 	do
 		start_test "Load $sound_module"
-		modprobe $sound_module
+		modprobe "$sound_module"
 		result $? "${TEST_PREFIX}load-$sound_module"
 	done
 else
@@ -37,25 +37,26 @@ result $? audio-aplay
 
 start_test "Check presence of the sox binary"
 play --version
-if [ $? -ne 0 ];then
+RET=$?
+if [ $RET -ne 0 ];then
 	echo "DEBUG: Missing sox package"
 	result SKIP "audio-sox"
 	exit 0
 fi
 
-for audiofile in $(ls audio/*wav)
+for audiofile in audio/*wav
 do
 	start_test "Run $audiofile via sox (default)"
-	play -q $audiofile
-	result $? audio-sox-default-$audiofile
+	play -q "$audiofile"
+	result $? "audio-sox-default-$audiofile"
 done
 
 export AUDIODEV=hw:0,0
 export AUDIODRIVER=alsa
 
-for audiofile in $(ls audio/*wav)
+for audiofile in audio/*wav
 do
 	start_test "Run $audiofile via sox"
-	play -q $audiofile
-	result $? audio-sox-$audiofile
+	play -q "$audiofile"
+	result $? "audio-sox-$audiofile"
 done
