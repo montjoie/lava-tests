@@ -21,7 +21,7 @@ find /lib/modules -type f |grep -E 'media|video' | sed 's,.*/,,' |
 while read video_module
 do
 	start_test "Load module $video_module"
-	modprobe $video_module
+	modprobe "$video_module"
 	result $? "video-load-$video_module"
 done
 
