@@ -32,5 +32,5 @@ ping -c 4 8.8.8.8
 result $? "external-network"
 
 start_test "Test DNS"
-ping -c 4 storage.kernelci.org
+ping -c 4 dns.google.com
 result $? "dns"
