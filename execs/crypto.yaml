@@ -4,14 +4,14 @@ metadata:
   description: "Montjoie test"
   version: 1.0
 run:
-    steps:
-      - echo "Crypto tests"
-      - lava-test-set start test-crypto
-      - chmod +x ./crypto.sh
-      - ./crypto.sh
-      - lava-test-set stop test-crypto
-      - echo "LUKS tests"
-      - lava-test-set start test-luks
-      - chmod +x ./luks.sh
-      - ./luks.sh
-      - lava-test-set stop test-luks
+  steps:
+    - echo "Crypto tests"
+    - lava-test-set start test-crypto
+    - chmod +x ./crypto.sh
+    - ./crypto.sh
+    - lava-test-set stop test-crypto
+    - echo "LUKS tests"
+    - lava-test-set start test-luks
+    - chmod +x ./luks.sh
+    - ./luks.sh
+    - lava-test-set stop test-luks
