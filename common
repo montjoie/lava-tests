@@ -137,13 +137,24 @@ get_machine_model() {
 # parameter need to be terminated by =
 check_config() {
 	if [ ! -e /proc/config.gz ];then
-		echo "DEBUG: Cannot check config"
+		echo "DEBUG: Cannot check config (Missing /proc/config.gz)"
 		return 0
 	fi
 	zgrep -q "^CONFIG_$1" /proc/config.gz
-	if [ $? -eq 0 ];then
+	RET=$?
+	if [ $RET -eq 0 ];then
 		echo "DEBUG: $1 is enabled"
 		return 0
+	fi
+	if [ $RET -eq 127 ];then
+		gunzip -c /proc/config.gz > "$OUTPUT_DIR/config"
+		grep -q "^CONFIG_$1" "$OUTPUT_DIR/config"
+		RET=$?
+		rm "$OUTPUT_DIR/config"
+		if [ $RET -eq 0 ];then
+			echo "DEBUG: $1 is enabled"
+			return 0
+		fi
 	fi
 	return 1
 }
