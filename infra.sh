@@ -24,8 +24,16 @@ if [ -z "$GATEWAY_IP" ];then
 else
 	echo "DEBUG: detected $GATEWAY_IP as gateway"
 fi
-ping -c 4 $GATEWAY_IP
+ping -c 4 "$GATEWAY_IP"
 result $? "ping-gateway"
+
+grep nameserver /proc/net/pnp | cut -d' ' -f2 > "$OUTPUT_DIR/nameservers"
+while read -r nameserver
+do
+	start_test "Test nameserver $nameserver"
+	ping -c 4 "$nameserver"
+	result $? "ping-nameserver-$nameserver"
+done < "$OUTPUT_DIR/nameservers"
 
 start_test "Test external network"
 ping -c 4 8.8.8.8
