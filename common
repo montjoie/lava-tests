@@ -219,3 +219,30 @@ try_run()
 	fi
 	return $RET
 }
+
+# check if a tool is present
+check_tool() {
+	case "$1" in
+	ip)
+		ip -Version 2>/dev/null >"$OUTPUT_DIR/ip-version"
+		RET=$?
+		if [ $RET -eq 0 ];then
+			cat "$OUTPUT_DIR/ip-version"
+			return 0
+		fi
+
+		#ip -Version does not work on busybox
+		ip link show 2>/dev/null >/dev/null
+		return $?
+	;;
+	ethtool)
+		ethtool --version
+		return $?
+	;;
+	*)
+		echo "ERROR: unknown tool $1"
+		return 1
+	;;
+	esac
+	return 1
+}

@@ -5,31 +5,64 @@
 get_machine_model
 
 HAVE_ETHTOOL=0
-INTERFACE=eth0
 TEST_PREFIX="test-network"
 NBD_ROOT=0
+NFS_ROOT=0
 
-grep -i nbd /proc/mounts
-if [ $? -eq 0 ];then
+start_test "Detect the use of a NBD root"
+grep -i "nbd" /proc/mounts
+RET=$?
+if [ $RET -eq 0 ];then
 	NBD_ROOT=1
+	# TODO detect on which interface NBD/NFS link is done
 fi
+result 0 "network-nbd-root"
+
+start_test "Detect the use of a NFS root"
+grep -i "nfs" /proc/mounts
+RET=$?
+if [ $RET -eq 0 ];then
+	NFS_ROOT=1
+	# TODO detect on which interface NBD/NFS link is done
+fi
+result 0 "network-nfs-root"
+
+start_test "Detect ip"
+check_tool "ip"
+result 0 "network-detect-ip"
+
+start_test "Detect ethtool"
+check_tool "ethtool"
+RET=$?
+if [ $RET -eq 0 ];then
+	HAVE_ETHTOOL=1
+fi
+result 0 "network-detect-ethtool"
 
 start_test "Run ip"
 ip a
-result $? "ip"
+result $? "network-ip-a"
 
 start_test "Run ifconfig"
 ifconfig
-result $? "ifconfig"
+result $? "network-ifconfig"
 
 start_test "Run ip route"
 ip route
-result $? "ip-route"
+result $? "network-ip-route"
 
 start_test "Test gateway"
 GATEWAY_IP=$(ip route |grep ^default | cut -d' ' -f3)
-ping -c4 $GATEWAY_IP
-result $? "ping-gateway"
+ping -c4 "$GATEWAY_IP"
+result $? "network-ping-gateway"
+
+grep nameserver /proc/net/pnp | cut -d' ' -f2 > "$OUTPUT_DIR/nameservers"
+while read -r nameserver
+do
+	start_test "Test nameserver $nameserver"
+	ping -c 4 "$nameserver"
+	result $? "ping-nameserver-$nameserver"
+done < "$OUTPUT_DIR/nameservers"
 
 start_test "Test external network"
 ping -c4 8.8.8.8
@@ -46,26 +79,26 @@ result $? "dns"
 # arg4: netdev used
 kci_netdev_ethtool_test()
 {
-	if [ $# -le 2 ];then
-		echo "SKIP: $4: ethtool: invalid number of arguments"
+	summary=$2
+	netdev=$4
+	if [ $# -ne 4 ];then
+		echo "FAIL: ethtool: invalid number of arguments"
 		return 1
 	fi
-	start_test "Test ethtool $2 on $4"
+	start_test "Test ethtool $summary on $netdev"
 	echo "DEBUG: run $3"
 	$3
 	ret=$?
 	if [ $ret -ne 0 ];then
 		if [ $ret -eq "$1" ];then
-			#echo "SKIP: $netdev: ethtool $2 not supported"
-			result SKIP --sleep 3 "network-$4-ethtool-$2"
+			result SKIP --sleep 3 "network-$netdev-ethtool-$summary"
 			return 0
 		else
-			#echo "FAIL: $netdev: ethtool $2"
-			result 1 --sleep 3 "network-$4-ethtool-$2"
+			result $ret --sleep 3 "network-$netdev-ethtool-$summary"
 			return 0
 		fi
 	else
-		result 0 --sleep 3 "network-$4-ethtool-$2"
+		result 0 --sleep 3 "network-$netdev-ethtool-$summary"
 	fi
 	return 0
 }
@@ -77,128 +110,62 @@ test_interface() {
 		return 1
 	fi
 	netdev="$1"
-	echo "DEBUG: test_interface $1"
+	echo "DEBUG: test_interface $netdev"
 
-	start_test "Get features list from $1"
-	ethtool -k $1
-	result $? "network-$1-ethtool-features-list"
+	if [ $HAVE_ETHTOOL -ne 1 ];then
+		return 0
+	fi
+
+	start_test "Get features list from $netdev"
+	ethtool -k "$netdev"
+	result $? "network-$netdev-ethtool-features-list"
 
 	kci_netdev_ethtool_test 74 'selftest' "ethtool --test $netdev online" "$netdev"
 	kci_netdev_ethtool_test 74 'dump' "ethtool -d $netdev" "$netdev"
 	kci_netdev_ethtool_test 94 'stats' "ethtool -S $netdev" "$netdev"
 
-	start_test "Detect if $1 have an IP"
-	ip address show dev $1 |grep -q 'inet[[:space:]]'
-	if [ $? -ne 0 ];then
-		echo "DEBUG: $1 have no IP"
+	# disruptive test begins here
+	if [ $NBD_ROOT -eq 1 ];then
+		echo "DEBUG: bypassing test on $netdev due to NBD"
 		return 0
 	fi
-
-	start_test "Detect if $1 have a gateway"
-	#try to find something to ping
-	GATEWAY=$(ip route |grep ^default | cut -d' ' -f3)
-	if [ -z "$GATEWAY" ];then
-		result SKIP "network-$1-ping-gateway"
-	else
-		echo "DEBUG: Found gateway $GATEWAY"
-		start_test "ping the gateway"
-		ping -c4 $GATEWAY
-		result $? "network-$1-ping-gateway"
+	if [ $NFS_ROOT -eq 1 ];then
+		echo "DEBUG: bypassing test on $netdev due to NFS"
+		return 0
 	fi
-
-}
-
-# compare current ethtool output with a reference one
-# TODO enhance those test
-compare_ethtool() {
-	/usr/sbin/ethtool eth0 > $OUTPUT_DIR/ethtool.raw
-	RET=$?
-	if [ $RET -ne 0 ];then
-		echo "DEBUG: Should not fail"
-		return $RET
-	fi
-	wget http://kernel.montjoie.ovh/reference/${MACHINE_MODEL_}.ethtool
-	RET=$?
-	if [ $RET -ne 0 ];then
-		echo "DEBUG: Cannot get reference ethtool for ${MACHINE_MODEL_}"
-		return $RET
-	fi
-	diff -u $OUTPUT_DIR/ethtool.raw ${MACHINE_MODEL_}.ethtool
-	echo "DEBUG: diff $?"
-}
-
-start_test "Detect ethtool"
-/usr/sbin/ethtool --version
-if [ $? -eq 0 ];then
-	HAVE_ETHTOOL=1
-fi
-result 0 "detect-ethtool"
-
-#for iface in $(ls /sys/class/net/)
-for f in /sys/class/net/*
-do
-	iface=$(basename $f)
-	driver=$(readlink $f/device/driver/module)
-	if [ ! -z "$driver" ]; then
-		driver=$(basename $driver)
-	else
-		echo "SKIP: dont check $iface with no driver"
-	fi
-	echo "DEBUG: Found interface $iface with driver=$driver"
-	if [ "$iface" == 'lo' ];then
-		echo "SKIP: dont check $iface"
-		continue
-	fi
-	test_interface $iface
-done
-
-# TODO add mii-tool to rootfs
-#start_test "Detect mii-tool"
-#/sbin/mii-tool eth0
-#result SKIP "mii-tool"
-
-start_test "Detect an iperf server"
-ping -c4 iperf.lava.local
-if [ $? -eq 0 ];then
-	/usr/bin/iperf3 -c iperf.lava.local
-	result $? "iperf"
-else
-	result SKIP "iperf"
-fi
-
-# TODO check counter ifconfig
-
-if [ $HAVE_ETHTOOL -eq 1 -a $NBD_ROOT -eq 0 ];then
-	netdev=$INTERFACE
+	echo "DEBUG: disruptive test begin on $netdev"
 	# keep supported speed mode
-	CURRENT_SPEED=$(ethtool $INTERFACE |grep Speed: | grep -o '[0-9]*')
-	CURRENT_DUPLEX=$(ethtool $INTERFACE |grep Duplex: | grep -o '[A-Za-z]*$')
+	CURRENT_SPEED=$(ethtool "$netdev" |grep 'Speed:' | grep -o '[0-9]*')
+	CURRENT_DUPLEX=$(ethtool "$netdev" |grep 'Duplex:' | grep -o '[A-Za-z]*$')
 	if [ "$CURRENT_DUPLEX" = 'Full' ];then
 		CURRENT_DUPLEX='full'
 	fi
 	if [ "$CURRENT_DUPLEX" = 'Half' ];then
 		CURRENT_DUPLEX='half'
 	fi
-	echo "DEBUG: Detected $CURRENT_SPEED $CURRENT_DUPLEX"
+	echo "DEBUG: Detected $CURRENT_SPEED $CURRENT_DUPLEX on $netdev"
 
-	ethtool $INTERFACE | sed 's,Half[[:space:]]*,half\n,g' | sed 's,Full[[:space:]]*,full\n,g' | sed 's,10[0-9]*base,\n&,' |grep -v '^[[:space:]]*$' > $OUTPUT_DIR/ethtool.${INTERFACE}.out
+	ethtool "$netdev" | sed 's,Half[[:space:]]*,half\n,g' | sed 's,Full[[:space:]]*,full\n,g' | sed 's,10[0-9]*base,\n&,' |grep -v '^[[:space:]]*$' > "$OUTPUT_DIR/ethtool.${netdev}.out"
 	READMODE=""
-	while read line
+	while read -r line
 	do
-		echo $line | grep -q 'Supported link modes'
-		if [ $? -eq 0 ] ;then
+		echo "$line" | grep -q 'Supported link modes'
+		RET=$?
+		if [ $RET -eq 0 ] ;then
 			echo "DEBUG: begin supported"
 			READMODE='SUPPORTED'
 			continue
 		fi
-		echo $line | grep -q 'Link partner advertised link modes'
-		if [ $? -eq 0 ] ;then
-			echo "DEBUG: begin parnter"
+		echo "$line" | grep -q 'Link partner advertised link modes'
+		RET=$?
+		if [ $RET -eq 0 ] ;then
+			echo "DEBUG: begin partner"
 			READMODE='PARTNER'
 			continue
 		fi
 		echo "$line" |grep -q '^[0-9]'
-		if [ $? -ne 0 ] ;then
+		RET=$?
+		if [ $RET -ne 0 ] ;then
 			READMODE=''
 			continue
 		fi
@@ -209,22 +176,24 @@ if [ $HAVE_ETHTOOL -eq 1 -a $NBD_ROOT -eq 0 ];then
 		;;
 		'PARTNER')
 			echo "DEBUG: Found partner $line"
-			echo "$line" >> $OUTPUT_DIR/ethtool.mode.partner
+			echo "$line" >> "$OUTPUT_DIR/ethtool.mode.partner"
 		;;
 		*)
 			echo "DEBUG: Ignore $line"
 		;;
 		esac
-	done < $OUTPUT_DIR/ethtool.${INTERFACE}.out
+	done < "$OUTPUT_DIR/ethtool.${netdev}.out"
 
-	while read ethmode
+	# test all modes
+	while read -r ethmode
 	do
-		DUPLEX=$(echo $ethmode | cut -d'/' -f2)
-		SPEED=$(echo $ethmode | grep -o '^[0-9][0-9]*')
+		DUPLEX=$(echo "$ethmode" | cut -d'/' -f2)
+		SPEED=$(echo "$ethmode" | grep -o '^[0-9][0-9]*')
 		# check that partner support it
-		if [ -s $OUTPUT_DIR/ethtool.mode.partner ];then
-			grep -q $ethmode $OUTPUT_DIR/ethtool.mode.partner
-			if [ $? -ne 0 ];then
+		if [ -s "$OUTPUT_DIR/ethtool.mode.partner" ];then
+			grep -q "$ethmode" "$OUTPUT_DIR/ethtool.mode.partner"
+			RET=$?
+			if [ $RET -ne 0 ];then
 				result SKIP "network-$netdev-link-$ethmode"
 				continue
 			fi
@@ -233,17 +202,77 @@ if [ $HAVE_ETHTOOL -eq 1 -a $NBD_ROOT -eq 0 ];then
 		echo "DEBUG: TEST $SPEED $DUPLEX"
 		kci_netdev_ethtool_test 666 "change-speed-to-$ethmode" "ethtool -s $netdev speed $SPEED duplex $DUPLEX" "$netdev"
 		# give network some time to detect a link
-		sleep 2
+		sleep 3
 		#check if link is up
-		ip link show $netdev |grep -q NO-CARRIER
-		if [ $? -eq 0 ];then
+		ip link show "$netdev" |grep -q 'NO-CARRIER'
+		RET=$?
+		if [ $RET -eq 0 ];then
 			result 1 "network-$netdev-link-$ethmode"
 		else
 			result 0 "network-$netdev-link-$ethmode"
 		fi
-	done < $OUTPUT_DIR/ethtool.mode.supported
+	done < "$OUTPUT_DIR/ethtool.mode.supported"
+
 	#go back to current mode
 	kci_netdev_ethtool_test 666 "change-speed-back" "ethtool -s $netdev speed $CURRENT_SPEED duplex $CURRENT_DUPLEX" "$netdev"
+	return 0
+}
 
+# compare current ethtool output with a reference one
+# TODO enhance those test
+compare_ethtool() {
+	/usr/sbin/ethtool eth0 > "$OUTPUT_DIR/ethtool.raw"
+	RET=$?
+	if [ $RET -ne 0 ];then
+		echo "DEBUG: Should not fail"
+		return $RET
+	fi
+	wget "http://kernel.montjoie.ovh/reference/${MACHINE_MODEL_}.ethtool"
+	RET=$?
+	if [ $RET -ne 0 ];then
+		echo "DEBUG: Cannot get reference ethtool for ${MACHINE_MODEL_}"
+		return $RET
+	fi
+	diff -u "$OUTPUT_DIR/ethtool.raw" "${MACHINE_MODEL_}.ethtool"
+	echo "DEBUG: diff $?"
+}
+
+#for iface in $(ls /sys/class/net/)
+for f in /sys/class/net/*
+do
+	iface=$(basename "$f")
+	driverpath=$(readlink "$f/device/driver")
+	driver=$(basename "$driverpath")
+	if [ -z "$driver" ]; then
+		echo "SKIP: dont check $iface with no driver"
+	fi
+	if [ -e "$f/phydev/driver" ];then
+		phydevpath=$(readlink "$f/phydev/driver")
+		phydev=$(basename "$phydevpath")
+		echo "DEBUG: Using phydev $phydev"
+	fi
+	echo "DEBUG: Found interface $iface with driver=$driver"
+	if [ "$iface" = 'lo' ];then
+		echo "SKIP: dont check $iface"
+		continue
+	fi
+	test_interface "$iface"
+done
+
+# TODO add mii-tool to rootfs
+#start_test "Detect mii-tool"
+#/sbin/mii-tool eth0
+#result SKIP "mii-tool"
+
+start_test "Detect an iperf server"
+ping -c4 iperf.lava.local
+RET=$?
+if [ $RET -eq 0 ];then
+	/usr/bin/iperf3 -c iperf.lava.local
+	result $? "iperf"
+	# TODO analyze results
+else
+	result SKIP "iperf"
 fi
 
+# TODO check counter ifconfig
