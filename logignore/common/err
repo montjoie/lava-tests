@@ -1,0 +1,2 @@
+udevd.*specified group 'kvm' unknown
+udevd.*Error changing net interface name eth0 to enp2s0: Device or resource busy

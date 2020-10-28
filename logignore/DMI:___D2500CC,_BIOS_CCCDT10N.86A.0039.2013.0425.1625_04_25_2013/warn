@@ -1,0 +1,6 @@
+ACPI BIOS Warning (bug): 32/
+ACPI BIOS Warning (bug): Invalid length for FADT
+ACPI: IRQ 3 override to edge, high
+ACPI: IRQ 4 override to edge, high
+udevd.*could not rename interface '2' from 'eth0' to 'enp2s0': Device or resource busy
+e1000e 0000:02:00.0 eth0: Link Speed was downgraded by SmartSpeed
