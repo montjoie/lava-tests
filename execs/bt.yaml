@@ -1,0 +1,12 @@
+metadata:
+  name: Montjoie BT tests
+  format: "Lava-Test-Shell Test Definition 1.0"
+  description: "Montjoie test"
+  version: 1.0
+run:
+    steps:
+      - echo "Network tests"
+      - lava-test-set start test-bt
+      - chmod +x ./bt.sh
+      - ./bt.sh
+      - lava-test-set stop test-bt
