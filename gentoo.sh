@@ -6,6 +6,7 @@ echo "======================================================"
 mount
 echo "======================================================"
 
+install_portage() {
 if [ -z "$PORTAGE_URL" ];then
 	PORTAGE_URL="$2"
 	echo "DEBUG: get PORTAGE_URL from parameter"
@@ -48,9 +49,10 @@ if [ -e /var/db/repos/gentoo/portage ];then
 	#rm -r /usr/portage
 	#ln -s /var/db/repos/gentoo/ /usr/portage
 fi
+}
 
 echo "DEBUG: prepare portage"
-echo 'USE="-X -nls -acl -thin -btrfs -device-mapper -sodium -fortran -openmp -bindist"' >> /etc/portage/make.conf
+echo 'USE="-X -nls -acl -thin -btrfs -device-mapper -sodium -fortran -openmp -bindist caps"' >> /etc/portage/make.conf
 #echo 'FEATURES="-distlocks noman nodoc"' >> /etc/portage/make.conf
 echo 'FEATURES="noman nodoc"' >> /etc/portage/make.conf
 # TODO un-hardcode thos
@@ -59,9 +61,23 @@ echo "MAKEOPTS=-j$(grep --count processor /proc/cpuinfo)" >> /etc/portage/make.c
 echo 'PORTDIR_OVERLAY="/usr/local/portage"' >> /etc/portage/make.conf
 
 echo "======================================================"
+echo "INFO: fix /lib/modules problem"
 chown -c root:root /lib
 chmod -c 755 /lib
 echo "======================================================"
+
+echo "INFO: compile on tmpfs"
+mkdir -p /var/tmp/portage
+mount -t tmpfs none /var/tmp/portage
+
+MINDATE=1604989081
+echo "INFO: check date"
+CURRDATE=$(date +%s)
+if [ $CURRDATE -le $MINDATE ];then
+	echo "INFO: set date"
+	date +%s -s "@$MINDATE"
+	date
+fi
 
 start_test "Select profile"
 SP_RESULT=0
@@ -69,9 +85,15 @@ case $(uname -m) in
 x86_64)
 	#ln -sf /usr/portage/profiles/default/linux/amd64/17.0 /etc/portage/make.profile
 	eselect profile set default/linux/amd64/17.1
+	SP_RESULT=$?
 ;;
 armv7l)
 	eselect profile set default/linux/arm/17.0/armv7a
+	SP_RESULT=$?
+;;
+aarch64)
+	eselect profile set default/linux/arm64/17.0
+	SP_RESULT=$?
 ;;
 *)
 	echo "ERROR: cannot set profile, unknow arch $(uname -m)"
@@ -81,30 +103,90 @@ armv7l)
 esac
 result $SP_RESULT "test-gentoo-select-profile"
 
-mkdir -p /usr/portage/packages
-mkdir -p /usr/portage/distfiles
-chown portage /usr/portage/distfiles
-
-#mkdir /var/db/repos/gentoo/distfiles/
-#chown portage /var/db/repos/gentoo/distfiles/
-
-#mkdir /tmp/tomove
-#mv /var/log/* /tmp/tomove/
-#mount -t tmpfs none /var/log/
-#mv /tmp/tomove/* /var/log/
-
 start_test "Ran emerge info"
 emerge --info
 result $? "test-gentoo-emerge-info"
 
-start_test "Install nfs-utils"
-emerge --nospinner --quiet --color n -v nfs-utils
+start_test "Read all news"
+eselect news read --quiet all
+result $? "test-gentoo-news-read"
+
+start_test "Purge news"
+eselect news purge
+result $? "test-gentoo-news-purge"
+
+#start_test "Install ntp"
+#emerge --nospinner --quiet --color n -v ntp -bk
+#result $? "test-gentoo-install-ntp"
+
+start_test "Install git"
+emerge --nospinner --quiet --color n -v dev-vcs/git -bk
+result $? "test-gentoo-install-git"
+
+start_test "Install distcc"
+emerge --nospinner --quiet --color n -v sys-devel/distcc -bk
+result $? "test-gentoo-install-distcc"
+
+start_test "Install bc"
+emerge --nospinner --quiet --color n -v sys-devel/bc -bk
+result $? "test-gentoo-install-bc"
+
+#start_test "Install nfs-utils"
+#emerge --nospinner --quiet --color n -v nfs-utils -bk
+#RET=$?
+#if [ $RET -ne 0 ];then
+#	result FAIL "test-gentoo-install-nfs-utils"
+#	exit 0
+#fi
+#result 0 "test-gentoo-install-nfs-utils"
+
+start_test "Deploy custom portage"
+git clone --quiet https://github.com/montjoie/montjoiegentooportage.git /usr/local/portage
+result $? "test-gentoo-local-portage"
+
+start_test "Install cfengine"
+USE="yaml" emerge --nospinner --quiet --color n -v cfengine -bk
 RET=$?
 if [ $RET -ne 0 ];then
-	result FAIL "test-gentoo-install-nfs-utils"
+	result FAIL "test-gentoo-install-cfengine"
 	exit 0
 fi
-result 0 "test-gentoo-install-nfs-utils"
+result 0 "test-gentoo-install-cfengine"
+
+start_test "Create cfengine key"
+cf-key
+result $? "test-gentoo-cfengine-key"
+
+echo "HACK: pre fix rigths on /var/db/pkg/"
+chmod -R o-rwx /var/db/pkg/
+chgrp -R portage /var/db/pkg/
+
+start_test "Boot strap cfengine"
+cf-agent -B 192.168.1.100
+result $? "test-gentoo-cfengine-bootstrap"
+
+start_test "Boot strap cfengine step 2"
+cf-agent -K -I
+result $? "test-gentoo-cfengine-bootstrap"
+
+start_test "Boot strap cfengine step 3"
+cf-agent -K -I
+result $? "test-gentoo-cfengine-bootstrap3"
+
+echo "============================"
+/var/cfengine/modules/detect_network -d
+echo "============================"
+/var/cfengine/modules/detect_hw -d
+echo "============================"
+
+for dire in /var /home /var/cache /etc/portage
+do
+	echo "=================================== $dire"
+	ls -la $dire
+	echo "==================================="
+done
+
+exit 0
 
 start_test "mount portage"
 mount -t nfs -o ro,tcp,hard,intr,async,vers=3 192.168.1.100:/usr/portage/ /usr//portage/
@@ -150,25 +232,4 @@ if [ $RET -ne 0 ];then
 	exit 0
 fi
 result 0 "test-gentoo-install-ethtool"
-
-start_test "Install cfengine"
-USE="yaml" emerge --nospinner --quiet --color n -v cfengine
-RET=$?
-if [ $RET -ne 0 ];then
-	result FAIL "test-gentoo-install-cfengine"
-	exit 0
-fi
-result 0 "test-gentoo-install-cfengine"
-
-start_test "Boot strap cfengine"
-cf-agent -B 192.168.1.100
-result $? "test-gentoo-cfengine-bootstrap"
-
-start_test "Boot strap cfengine step 2"
-cf-agent -K -I
-result $? "test-gentoo-cfengine-bootstrap"
-
-start_test "Boot strap cfengine step 3"
-cf-agent -K -I
-result $? "test-gentoo-cfengine-bootstrap3"
 
