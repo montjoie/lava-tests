@@ -1,5 +1,6 @@
 #!/bin/sh
 
+old() {
 echo "TOOLCHAIN"
 for toolchain in armv7a-unknown-linux-gnueabihf/gcc-bin/9.2.0/ armv7a-unknown-linux-gnueabihf/binutils-bin/2.33.1/
 do
@@ -35,6 +36,12 @@ echo "VERIFY BINUTILS"
 ldd /usr/armv7a-unknown-linux-gnueabihf/binutils-bin/2.33.1/armv7a-unknown-linux-gnueabihf-as
 as --version
 armv7a-unknown-linux-gnueabihf-as --version
+}
+
+
+
+gcc-config -l -C
+eselect binutils list
 
 echo "DISTCC UPDATE"
 /usr/sbin/update-distcc-symlinks
@@ -49,17 +56,12 @@ echo $?
 pwd
 
 echo "RUN distcc"
-#/usr/bin/distccd --daemon --make-me-a-botnet --log-stderr --allow 192.168.1.0/24 --enable-tcp-insecure --verbose --port 3632 --log-level=debug
+/usr/bin/distccd --daemon --make-me-a-botnet --log-stderr --allow 192.168.1.0/24 --enable-tcp-insecure --verbose --port 3632 --log-level=debug
 #/usr/bin/distccd --no-detach --make-me-a-botnet --log-stderr --allow 192.168.1.0/24 --enable-tcp-insecure --verbose --port 3632
 sleep 2
-#ps aux
+ps aux
 netstat -lpn
 
-sleep 1000000000000
-sleep 100000000000
-sleep 10000000000
-sleep 1000000000
-sleep 100000000
 
 echo "RUN distcc client"
-/opt/distcc.py --serveur 192.168.1.22 --netport 15154
+./distcc.py --serveur $DISTCC_SRV --netport 15154
