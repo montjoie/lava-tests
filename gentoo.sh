@@ -107,6 +107,14 @@ start_test "Ran emerge info"
 emerge --info
 result $? "test-gentoo-emerge-info"
 
+start_test "List GCC profile"
+gcc-config -l
+result $? "test-gentoo-gcc-config"
+
+start_test "List binutils profiles"
+eselect binutils list
+result $? "test-gentoo-eselect-binutils"
+
 start_test "Read all news"
 eselect news read --quiet all
 result $? "test-gentoo-news-read"
@@ -120,14 +128,17 @@ result $? "test-gentoo-news-purge"
 #result $? "test-gentoo-install-ntp"
 
 start_test "Install git"
+emerge --nospinner --quiet --color n -v dev-vcs/git -bkp
 emerge --nospinner --quiet --color n -v dev-vcs/git -bk
 result $? "test-gentoo-install-git"
 
 start_test "Install distcc"
+emerge --nospinner --quiet --color n -v sys-devel/distcc -bkp
 emerge --nospinner --quiet --color n -v sys-devel/distcc -bk
 result $? "test-gentoo-install-distcc"
 
 start_test "Install bc"
+emerge --nospinner --quiet --color n -v sys-devel/bc -bkp
 emerge --nospinner --quiet --color n -v sys-devel/bc -bk
 result $? "test-gentoo-install-bc"
 
@@ -145,7 +156,8 @@ git clone --quiet https://github.com/montjoie/montjoiegentooportage.git /usr/loc
 result $? "test-gentoo-local-portage"
 
 start_test "Install cfengine"
-USE="yaml" emerge --nospinner --quiet --color n -v cfengine -bk
+USE="yaml lmdb -qdbm" emerge --nospinner --quiet --color n -v cfengine -bkp
+USE="yaml lmdb -qdbm" emerge --nospinner --quiet --color n -v cfengine -bk
 RET=$?
 if [ $RET -ne 0 ];then
 	result FAIL "test-gentoo-install-cfengine"
@@ -178,6 +190,8 @@ echo "============================"
 echo "============================"
 /var/cfengine/modules/detect_hw -d
 echo "============================"
+/var/cfengine/modules/dwh -d
+echo "============================"
 
 for dire in /var /home /var/cache /etc/portage
 do
@@ -185,6 +199,16 @@ do
 	ls -la $dire
 	echo "==================================="
 done
+
+start_test "Install some pkgs"
+emerge --nospinner --quiet --color n -v ntp lsof cronie lm-sensors gentoolkit gemato portage openssh openssl -Nbkp
+emerge --nospinner --quiet --color n -v ntp lsof cronie lm-sensors gentoolkit gemato portage openssh openssl -bk
+result $? "test-gentoo-install-pkgs"
+
+start_test "pretend upgrade"
+emerge --nospinner --quiet --color n -v -bkpDNu world
+result $? "test-gentoo-upgrade"
+
 
 exit 0
 
