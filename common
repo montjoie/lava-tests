@@ -176,10 +176,22 @@ print_crypto_stat()
 
 try_run()
 {
+	STATUS=""
 	TIMEOUT=120
+	SLEEP=1
 	if [ "$1" == '-t' ];then
 		shift
 		TIMEOUT=$1
+		shift
+	fi
+	if [ "$1" = '-s' ];then
+		shift
+		STATUS="$1"
+		shift
+	fi
+	if [ "$1" = '-S' ];then
+		shift
+		SLEEP="$1"
 		shift
 	fi
 	rm -f $OUTPUT_DIR/try.end
@@ -204,7 +216,10 @@ try_run()
 		if [ -e $OUTPUT_DIR/try.end ];then
 			break
 		fi
-		sleep 1
+		sleep $SLEEP
+		if [ ! -z "$STATUS" ];then
+			cat $STATUS
+		fi
 		timeelapsed=$(($timeelapsed+1))
 	done
 	if [ $timeelapsed -ge $TIMEOUT ];then
