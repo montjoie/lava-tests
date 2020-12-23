@@ -6,6 +6,7 @@ else
 	OUTPUT_DIR=/tmp/output
 fi
 mkdir -p $OUTPUT_DIR
+chmod 755 $OUTPUT_DIR
 echo "DEBUG: OUTPUT_DIR is $OUTPUT_DIR"
 
 if [ -e /rootfs.version ];then
@@ -177,6 +178,7 @@ print_crypto_stat()
 try_run()
 {
 	STATUS=""
+	ESTATUS=""
 	TIMEOUT=120
 	SLEEP=1
 	if [ "$1" == '-t' ];then
@@ -187,6 +189,11 @@ try_run()
 	if [ "$1" = '-s' ];then
 		shift
 		STATUS="$1"
+		shift
+	fi
+	if [ "$1" = '-se' ];then
+		shift
+		ESTATUS="$1"
 		shift
 	fi
 	if [ "$1" = '-S' ];then
@@ -201,10 +208,18 @@ try_run()
 	echo \$RET > $OUTPUT_DIR/try.end
 	exit \$RET
 	" > $OUTPUT_DIR/try.sh
-	chmod +x $OUTPUT_DIR/try.sh
+	chmod 755 $OUTPUT_DIR/try.sh
 
 	echo "DEBUG: ===================="
 	cat $OUTPUT_DIR/try.sh
+	mount |grep -q /dev/shm
+	if [ $? -eq 0 ];then
+		mount |grep /dev/shm |grep -q noexec
+		if [ $? -eq 0 ];then
+			echo "INFO: remount /dev/shm"
+			mount -o remount rw /dev/shm
+		fi
+	fi
 	echo "DEBUG: ===================="
 
 	$OUTPUT_DIR/try.sh&
@@ -216,9 +231,18 @@ try_run()
 		if [ -e $OUTPUT_DIR/try.end ];then
 			break
 		fi
+		kill -0 $PID
+		if [ $? -ne 0 ];then
+			break
+		fi
 		sleep $SLEEP
 		if [ ! -z "$STATUS" ];then
 			cat $STATUS
+		fi
+		if [ ! -z "$ESTATUS" ];then
+			export COLUMNS=300
+			ps aux
+			dmesg | tail
 		fi
 		timeelapsed=$(($timeelapsed+1))
 	done

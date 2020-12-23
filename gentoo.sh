@@ -2,6 +2,9 @@
 
 . ./common
 
+export COLUMNS=200
+export TERM=dumb
+
 echo "======================================================"
 mount
 echo "======================================================"
@@ -52,7 +55,7 @@ fi
 }
 
 echo "DEBUG: prepare portage"
-echo 'USE="-X -nls -acl -thin -btrfs -device-mapper -sodium -fortran -openmp -bindist caps"' >> /etc/portage/make.conf
+echo 'USE="-X -nls -acl -thin -btrfs -device-mapper -sodium -fortran -openmp -bindist caps sqlite -gdbm"' >> /etc/portage/make.conf
 #echo 'FEATURES="-distlocks noman nodoc"' >> /etc/portage/make.conf
 echo 'FEATURES="noman nodoc"' >> /etc/portage/make.conf
 # TODO un-hardcode thos
@@ -70,7 +73,7 @@ echo "INFO: compile on tmpfs"
 mkdir -p /var/tmp/portage
 mount -t tmpfs none /var/tmp/portage
 
-MINDATE=1604989081
+MINDATE=1608795693
 echo "INFO: check date"
 CURRDATE=$(date +%s)
 if [ $CURRDATE -le $MINDATE ];then
@@ -123,14 +126,44 @@ start_test "Purge news"
 eselect news purge
 result $? "test-gentoo-news-purge"
 
-#start_test "Install ntp"
-#emerge --nospinner --quiet --color n -v ntp -bk
-#result $? "test-gentoo-install-ntp"
+echo "INFO: verify PKGDIR"
+PKGDIR=$(grep ^PKGDIR /etc/portage/make.conf)
+echo "FOUND $PKGDIR"
+PKGDIR=$(grep ^PKGDIR /etc/portage/make.conf | cut -d= -f2)
+echo "FOUND $PKGDIR"
+PKGDIR=$(grep ^PKGDIR /etc/portage/make.conf | cut -d= -f2 | sed 's,\\,,g' | sed 's,",,g' )
+echo "FOUND $PKGDIR"
+echo "=============================="
+ls -l $PKGDIR
+echo "=============================="
+ls -l $PKGDIR/
+echo "============================== /var/cache"
+ls -l /var/cache
+echo "=============================="
+if [ -e /usr/portage/packages ];then
+	echo "INFO: /usr/portage/packages exists"
+	ls -l /usr/portage/ |grep packages
+fi
+
+start_test "Install ntp"
+emerge --nospinner --quiet --color n -v ntp -bkp
+emerge --nospinner --quiet --color n -v ntp -bk
+result $? "test-gentoo-install-ntp"
+
+start_test "Sync on ntp"
+/etc/init.d/ntp-client restart
+result $? "test-gentoo-ntp-client"
 
 start_test "Install git"
 emerge --nospinner --quiet --color n -v dev-vcs/git -bkp
+#try_run -t 600 -se ps -S 30 emerge --nospinner --quiet --color n -v dev-vcs/git -bk
 emerge --nospinner --quiet --color n -v dev-vcs/git -bk
 result $? "test-gentoo-install-git"
+
+start_test "Upgrade python"
+emerge --nospinner --quiet --color n -1Dv python:2.7 python-exec -bkp
+emerge --nospinner --quiet --color n -1Dv python:2.7 python-exec -bk
+result $? "test-gentoo-python-upgrade"
 
 start_test "Install distcc"
 emerge --nospinner --quiet --color n -v sys-devel/distcc -bkp
@@ -203,6 +236,12 @@ done
 start_test "Install some pkgs"
 emerge --nospinner --quiet --color n -v ntp lsof cronie lm-sensors gentoolkit gemato portage openssh openssl -Nbkp
 emerge --nospinner --quiet --color n -v ntp lsof cronie lm-sensors gentoolkit gemato portage openssh openssl -bk
+result $? "test-gentoo-install-pkgs"
+
+echo "sys-fs/xfstests **" >> /etc/portage/package.keywords/xfstests
+start_test "Install xfstests"
+emerge --nospinner --quiet --color n -v xfstests -bkp
+emerge --nospinner --quiet --color n -v xfstests -bk
 result $? "test-gentoo-install-pkgs"
 
 start_test "pretend upgrade"
