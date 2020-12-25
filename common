@@ -132,6 +132,14 @@ get_machine_model() {
 	echo "===MACHINEMODEL==="
 	echo $MACHINE_MODEL_
 	echo "===MACHINEMODEL_END==="
+	echo $MACHINE_MODEL_ | grep -qE 'sun50i-a64|BananaPi-M64'
+	if [ $? -eq 0 ];then
+		SOC=a64
+	fi
+	echo $MACHINE_MODEL_ | grep -qE 'BPI-M2-Ultra'
+	if [ $? -eq 0 ];then
+		SOC=r40
+	fi
 }
 
 # test if config is enabled
