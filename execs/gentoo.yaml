@@ -7,8 +7,12 @@ run:
     steps:
       - echo "Gentoo tests"
       - lava-test-set start test-gentoo
+      - export
       - chmod +x ./gentoo.sh
       - ./gentoo.sh --portage-url $PORTAGE_URL
       - lava-test-set stop
 params:
   PORTAGE_URL: ""
+  DO_DISTCC: ""
+  DO_XFS: ""
+  DO_GUEST: ""

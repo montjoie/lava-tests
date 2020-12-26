@@ -126,17 +126,39 @@ start_test "Purge news"
 eselect news purge
 result $? "test-gentoo-news-purge"
 
+start_test "Check exported variables"
+export
+echo "DO_DISTCC: $DO_DISTCC"
+echo "DO_XFS: $DO_XFS"
+echo "DO_GUEST: $DO_GUEST"
+result $? "test-gentoo-export"
+
+echo "INFO: check accept keywords"
+if [ -e /etc/portage/package.accept_keywords ];then
+	if [ ! -d /etc/portage/package.accept_keywords ];then
+		mv /etc/portage/package.accept_keywords /etc/portage/package.accept_keywords2
+		mkdir /etc/portage/package.accept_keywords
+		mv /etc/portage/package.accept_keywords2 /etc/portage/package.accept_keywords/old
+	fi
+else
+	mkdir /etc/portage/package.accept_keywords
+fi
+
 echo "INFO: verify PKGDIR"
 PKGDIR=$(grep ^PKGDIR /etc/portage/make.conf)
-echo "FOUND $PKGDIR"
-PKGDIR=$(grep ^PKGDIR /etc/portage/make.conf | cut -d= -f2)
-echo "FOUND $PKGDIR"
-PKGDIR=$(grep ^PKGDIR /etc/portage/make.conf | cut -d= -f2 | sed 's,\\,,g' | sed 's,",,g' )
-echo "FOUND $PKGDIR"
-echo "=============================="
-ls -l $PKGDIR
-echo "=============================="
-ls -l $PKGDIR/
+if [ -z "$PKGDIR" ];then
+	echo "INFO: no PKGDIR in /etc/portage/make.conf"
+else
+	echo "FOUND $PKGDIR"
+	PKGDIR=$(grep ^PKGDIR /etc/portage/make.conf | cut -d= -f2)
+	echo "FOUND $PKGDIR"
+	PKGDIR=$(grep ^PKGDIR /etc/portage/make.conf | cut -d= -f2 | sed 's,\\,,g' | sed 's,",,g' )
+	echo "FOUND $PKGDIR"
+	echo "=============================="
+	ls -l $PKGDIR
+	echo "=============================="
+	ls -l $PKGDIR/
+fi
 echo "============================== /var/cache"
 ls -l /var/cache
 echo "=============================="
@@ -160,15 +182,21 @@ emerge --nospinner --quiet --color n -v dev-vcs/git -bkp
 emerge --nospinner --quiet --color n -v dev-vcs/git -bk
 result $? "test-gentoo-install-git"
 
+start_test "Deploy custom portage"
+git clone --quiet https://github.com/montjoie/montjoiegentooportage.git /usr/local/portage
+result $? "test-gentoo-local-portage"
+
 start_test "Upgrade python"
 emerge --nospinner --quiet --color n -1Dv python:2.7 python-exec -bkp
 emerge --nospinner --quiet --color n -1Dv python:2.7 python-exec -bk
 result $? "test-gentoo-python-upgrade"
 
-start_test "Install distcc"
-emerge --nospinner --quiet --color n -v sys-devel/distcc -bkp
-emerge --nospinner --quiet --color n -v sys-devel/distcc -bk
-result $? "test-gentoo-install-distcc"
+if [ "$DO_DISTCC" = 'yes' ];then
+	start_test "Install distcc"
+	emerge --nospinner --quiet --color n -v sys-devel/distcc -bkp
+	emerge --nospinner --quiet --color n -v sys-devel/distcc -bk
+	result $? "test-gentoo-install-distcc"
+fi
 
 start_test "Install bc"
 emerge --nospinner --quiet --color n -v sys-devel/bc -bkp
@@ -183,10 +211,6 @@ result $? "test-gentoo-install-bc"
 #	exit 0
 #fi
 #result 0 "test-gentoo-install-nfs-utils"
-
-start_test "Deploy custom portage"
-git clone --quiet https://github.com/montjoie/montjoiegentooportage.git /usr/local/portage
-result $? "test-gentoo-local-portage"
 
 start_test "Install cfengine"
 USE="yaml lmdb -qdbm" emerge --nospinner --quiet --color n -v cfengine -bkp
@@ -233,16 +257,34 @@ do
 	echo "==================================="
 done
 
+if [ "$(uname -m)" = 'x86_64' ];then
+	df -h
+	echo "=app-emulation/libguestfs-1.38.6-r100 * **" >> /etc/portage/package.accept_keywords/libguestfs
+	echo "app-emulation/libguestfs-appliance ~amd64" >> /etc/portage/package.accept_keywords/libguestfs
+	echo "dev-ml/ocaml-gettext ~amd64" >> /etc/portage/package.accept_keywords/libguestfs
+	echo "dev-ml/ocaml-fileutils ~amd64" >> /etc/portage/package.accept_keywords/libguestfs
+	echo "app-misc/hivex ~amd64" >> /etc/portage/package.accept_keywords/libguestfs
+	echo "dev-ml/base ~amd64" >> /etc/portage/package.accept_keywords/libguestfs
+	echo "app-emulation/qemu -png -jpeg" >> /etc/portage/package.use/qemu
+	start_test "Install libguestfs"
+	USE="natspec python -perl -ocaml -libvirt -fuse" emerge --nospinner --quiet --color n -v libguestfs -bkp
+	USE="natspec python -perl -ocaml -libvirt -fuse" emerge --nospinner --quiet --color n -v libguestfs -bk
+	result $? "test-gentoo-install-libguestfs"
+fi
+
+
 start_test "Install some pkgs"
 emerge --nospinner --quiet --color n -v ntp lsof cronie lm-sensors gentoolkit gemato portage openssh openssl -Nbkp
 emerge --nospinner --quiet --color n -v ntp lsof cronie lm-sensors gentoolkit gemato portage openssh openssl -bk
 result $? "test-gentoo-install-pkgs"
 
-echo "sys-fs/xfstests **" >> /etc/portage/package.keywords/xfstests
-start_test "Install xfstests"
-emerge --nospinner --quiet --color n -v xfstests -bkp
-emerge --nospinner --quiet --color n -v xfstests -bk
-result $? "test-gentoo-install-pkgs"
+if [ "$(uname -m)" = 'aarch64' ];then
+	echo "sys-fs/xfstests **" >> /etc/portage/package.accept_keywords/xfstests
+	start_test "Install xfstests"
+	emerge --nospinner --quiet --color n -v xfstests -bkp
+	emerge --nospinner --quiet --color n -v xfstests -bk
+	result $? "test-gentoo-install-xfstests"
+fi
 
 start_test "pretend upgrade"
 emerge --nospinner --quiet --color n -v -bkpDNu world
