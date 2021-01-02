@@ -143,6 +143,10 @@ test_interface() {
 	if [ "$CURRENT_DUPLEX" = 'Half' ];then
 		CURRENT_DUPLEX='half'
 	fi
+	if [ -z "$CURRENT_DUPLEX" ];then
+		echo "DEBUG: no duplex"
+		return 0
+	fi
 	echo "DEBUG: Detected $CURRENT_SPEED $CURRENT_DUPLEX on $netdev"
 
 	ethtool "$netdev" | sed 's,Half[[:space:]]*,half\n,g' | sed 's,Full[[:space:]]*,full\n,g' | sed 's,10[0-9]*base,\n&,' |grep -v '^[[:space:]]*$' > "$OUTPUT_DIR/ethtool.${netdev}.out"
