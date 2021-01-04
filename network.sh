@@ -94,6 +94,7 @@ kci_netdev_ethtool_test()
 			result SKIP --sleep 3 "network-$netdev-ethtool-$summary"
 			return 0
 		else
+			echo "DEBUG: return code=$ret"
 			result $ret --sleep 3 "network-$netdev-ethtool-$summary"
 			return 0
 		fi
