@@ -140,6 +140,10 @@ get_machine_model() {
 	if [ $? -eq 0 ];then
 		SOC=r40
 	fi
+	echo $MACHINE_MODEL_ | grep -qE 'Banana_Pi_BPI-M3'
+	if [ $? -eq 0 ];then
+		SOC=a83t
+	fi
 }
 
 # test if config is enabled

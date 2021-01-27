@@ -69,6 +69,22 @@ do
 			echo "Unknown controller"
 		esac
 	;;
+	a83t)
+		case $cblock in
+		1c0f000.mmc)
+			echo "Controller is SD"
+			BOOT_DEV=/dev/$block
+		;;
+		1c10000.mmc)
+			echo "Controller is SDIO"
+		;;
+		1c11000.mmc)
+			echo "Controller is SMHC2 EMMC"
+		;;
+		*)
+			echo "Unknown controller"
+		esac
+	;;
 	r40)
 		case $cblock in
 		1c0f000.mmc)
@@ -112,6 +128,13 @@ fi
 
 case $SOC in
 a64)
+	dd if=uboot-$MACHINE_MODEL_ of=$BOOT_DEV bs=8k seek=1
+	if [ $? -ne 0 ];then
+		echo "ERROR: uboot flash"
+	fi
+	sync
+;;
+a83t)
 	dd if=uboot-$MACHINE_MODEL_ of=$BOOT_DEV bs=8k seek=1
 	if [ $? -ne 0 ];then
 		echo "ERROR: uboot flash"
