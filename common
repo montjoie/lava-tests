@@ -144,6 +144,10 @@ get_machine_model() {
 	if [ $? -eq 0 ];then
 		SOC=a83t
 	fi
+	echo $MACHINE_MODEL_ | grep -qE 'Xunlong_Orange_Pi_PC'
+	if [ $? -eq 0 ];then
+		SOC=h3
+	fi
 }
 
 # test if config is enabled

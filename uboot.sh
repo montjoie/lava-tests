@@ -30,6 +30,7 @@ aarch64)
 ;;
 esac
 
+FLASH_METHOD=""
 BOOT_DEV=none
 for block in $(ls /sys/block/ |grep mmc | grep -v boot |grep -v 'p[0-9]$')
 do
@@ -38,6 +39,7 @@ do
 	echo "INFO: found $block from $cblock"
 	case $SOC in
 	H6)
+		FLASH_METHOD="sunxi"
 		case $cblock in
 		4020000.mmc)
 			echo "Controller is SD"
@@ -54,6 +56,7 @@ do
 		esac
 	;;
 	a64)
+		FLASH_METHOD="sunxi"
 		case $cblock in
 		1c0f000.mmc)
 			echo "Controller is SD"
@@ -70,6 +73,24 @@ do
 		esac
 	;;
 	a83t)
+		FLASH_METHOD="sunxi"
+		case $cblock in
+		1c0f000.mmc)
+			echo "Controller is SD"
+			BOOT_DEV=/dev/$block
+		;;
+		1c10000.mmc)
+			echo "Controller is SDIO"
+		;;
+		1c11000.mmc)
+			echo "Controller is SMHC2 EMMC"
+		;;
+		*)
+			echo "Unknown controller"
+		esac
+	;;
+	h3)
+		FLASH_METHOD="sunxi"
 		case $cblock in
 		1c0f000.mmc)
 			echo "Controller is SD"
@@ -86,6 +107,7 @@ do
 		esac
 	;;
 	r40)
+		FLASH_METHOD="sunxi"
 		case $cblock in
 		1c0f000.mmc)
 			echo "Controller is SD"
@@ -117,6 +139,8 @@ fi
 if [ -z "$UBOOT_BIN_URL" ];then
 	echo "INFO: UBOOT_BIN_URL default"
 	UBOOT_BIN_URL=http://boot.montjoie.local/uboot/
+else
+	echo "DEBUG: UBOOT_BIN_URL is $UBOOT_BIN_URL"
 fi
 
 echo "Will install uboot in $BOOT_DEV"
@@ -126,22 +150,8 @@ if [ $? -ne 0 ];then
 	exit 1
 fi
 
-case $SOC in
-a64)
-	dd if=uboot-$MACHINE_MODEL_ of=$BOOT_DEV bs=8k seek=1
-	if [ $? -ne 0 ];then
-		echo "ERROR: uboot flash"
-	fi
-	sync
-;;
-a83t)
-	dd if=uboot-$MACHINE_MODEL_ of=$BOOT_DEV bs=8k seek=1
-	if [ $? -ne 0 ];then
-		echo "ERROR: uboot flash"
-	fi
-	sync
-;;
-r40)
+case $FLASH_METHOD in
+sunxi)
 	dd if=uboot-$MACHINE_MODEL_ of=$BOOT_DEV bs=8k seek=1
 	if [ $? -ne 0 ];then
 		echo "ERROR: uboot flash"

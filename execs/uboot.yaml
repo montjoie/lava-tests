@@ -10,3 +10,5 @@ run:
       - chmod +x ./uboot.sh
       - ./uboot.sh
       - lava-test-set stop test-uboot
+params:
+  UBOOT_BIN_URL: ""
