@@ -99,15 +99,18 @@ is_network_v4_ok() {
 }
 
 get_machine_model() {
+	GET_MMODEL_DT=0
 	echo "DEBUG: get_machine_model"
 	if [ -e /sys/firmware/devicetree/base/compatible ];then
 		cat /sys/firmware/devicetree/base/compatible | tr '\0' '\n' > $OUTPUT_DIR/devicetree
 		echo "DEBUG: from devicetree got $(cat /sys/firmware/devicetree/base/compatible)"
+		GET_MMODEL_DT=1
 	else
 		echo "DEBUG: get_machine_model: No devicetree"
 	fi
 	dmesg | grep 'Machine model:' | sed 's,.*:[[:space:]],,' > $OUTPUT_DIR/machinemodel
 	if [ ! -s $OUTPUT_DIR/machinemodel ];then
+		echo "DEBUG: get_machine_model: DMI fallback"
 		# fallback to DMI
 		dmesg |grep -o 'DMI:.*' > $OUTPUT_DIR/machinemodel
 		if [ ! -s $OUTPUT_DIR/machinemodel ];then
@@ -120,6 +123,9 @@ get_machine_model() {
 				fi
 			else
 				echo "machine_model_unknow" > $OUTPUT_DIR/machinemodel
+				if [ $GET_MMODEL_DT -eq 1 ];then
+					head -n1 $OUTPUT_DIR/devicetree > $OUTPUT_DIR/machinemodel
+				fi
 			fi
 		else
 			echo "DEBUG: got machinemodel from DMI"
@@ -135,6 +141,10 @@ get_machine_model() {
 	echo $MACHINE_MODEL_ | grep -qE 'sun50i-a64|BananaPi-M64'
 	if [ $? -eq 0 ];then
 		SOC=a64
+	fi
+	echo $MACHINE_MODEL_ | grep -qE 'A20|sun7i-a20|a20-olinuxino'
+	if [ $? -eq 0 ];then
+		SOC=a20
 	fi
 	echo $MACHINE_MODEL_ | grep -qE 'BPI-M2-Ultra'
 	if [ $? -eq 0 ];then
@@ -300,4 +310,17 @@ check_tool() {
 	;;
 	esac
 	return 1
+}
+
+mini_network_test() {
+	# check /etc/resolv.conf
+	if [ -e /etc/resolv.conf ];then
+		echo "resolv.conf exists"
+		ls -l /etc/resolv.conf
+	else
+		echo "No resolv.conf"
+		# TODO solution of doing a link like said in https://www.kernel.org/doc/Documentation/filesystems/nfs/nfsroot.txt
+		grep nameserver /proc/net/pnp > /etc/resolv.conf
+	fi
+	chmod 644 /etc/resolv.conf
 }

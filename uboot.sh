@@ -1,5 +1,9 @@
 #!/bin/sh
 
+if [ ! -z "$1" ];then
+	UBOOT_BIN_URL="$1"
+fi
+
 . ./common
 
 start_test "Get machine model"
@@ -49,6 +53,23 @@ do
 			echo "Controller is SDIO"
 		;;
 		4022000.mmc)
+			echo "Controller is SMHC2 EMMC"
+		;;
+		*)
+			echo "Unknown controller"
+		esac
+	;;
+	a20)
+		FLASH_METHOD="sunxi"
+		case $cblock in
+		1c0f000.mmc)
+			echo "Controller is SD"
+			BOOT_DEV=/dev/$block
+		;;
+		1c10000.mmc)
+			echo "Controller is SDIO"
+		;;
+		1c11000.mmc)
 			echo "Controller is SMHC2 EMMC"
 		;;
 		*)
@@ -143,6 +164,7 @@ else
 	echo "DEBUG: UBOOT_BIN_URL is $UBOOT_BIN_URL"
 fi
 
+mini_network_test
 echo "Will install uboot in $BOOT_DEV"
 wget $UBOOT_BIN_URL/uboot-$MACHINE_MODEL_
 if [ $? -ne 0 ];then
