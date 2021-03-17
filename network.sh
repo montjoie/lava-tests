@@ -135,6 +135,75 @@ test_interface() {
 		return 0
 	fi
 	echo "DEBUG: disruptive test begin on $netdev"
+	#TODO detect if interface got an IP
+	NETDEV_HAS_IP=1
+	# test mtu change
+	#ifconfig eth0 mtu 1400
+	ip link show $netdev > $OUTPUT_DIR/iplink
+	OMTU=$(grep -o 'mtu [0-9]*' $OUTPUT_DIR/iplink | cut -d' ' -f2)
+	echo "DEBUG: original MTU is $OMTU"
+
+	for mtu in 68 500 1000 1200 1400 1500 1600 9000
+	do
+		if [ $mtu -eq $OMTU ];then
+			echo "DEBUG: skip $mtu as same as old MTU"
+			continue
+		fi
+		start_test "down $netdev for changing MTU"
+		ip link set $netdev down
+		result $? "network-$netdev-mtu-$mtu-down"
+
+		start_test "Set MTU to $mtu"
+		ip link set $netdev mtu $mtu
+		result $? "network-$netdev-mtu-$mtu"
+
+		start_test "up $netdev for changing MTU"
+		ip link set $netdev up
+		result $? "network-$netdev-mtu-$mtu-up"
+
+		echo "======================== MTU $mtu"
+		sleep 4
+		if [ $NETDEV_HAS_IP -eq 1 ];then
+			ip link show $netdev
+			udhcpc -i $netdev -q -f -n
+			sleep 5
+			ip a |grep -q 192.168
+			if [ $? -ne 0 ];then
+				ip a add 192.168.1.204 dev $netdev
+				ip route add default gw 192.168.1.1
+			fi
+			ip a
+		fi
+		echo "========================"
+		start_test "test ping with MTU $mtu"
+		ping -c 2 8.8.8.8
+		result $? "network-$netdev-mtu-$mtu-ping"
+	done
+
+	start_test "down $netdev for changing MTU to $OMTU"
+	ip link set $netdev down
+	result $? "network-$netdev-mtu-$OMTU-down"
+	start_test "Restore MTU to $OMTU"
+	ip link set $netdev mtu $OMTU
+	result $? "network-$netdev-mtu-restore-$OMTU"
+	start_test "up $netdev for changing MTU"
+	ip link set $netdev up
+	result $? "network-$netdev-mtu-$OMTU-up"
+
+	echo "========================"
+	if [ $NETDEV_HAS_IP -eq 1 ];then
+		udhcpc -i $netdev -q -f -n
+		sleep 5
+		ip a |grep -q 192.168
+		if [ $? -ne 0 ];then
+			ip a add 192.168.1.204 dev $netdev
+			ip route add default gw 192.168.1.1
+		fi
+		ip a
+	fi
+	ip link show $netdev
+	echo "========================"
+
 	# keep supported speed mode
 	CURRENT_SPEED=$(ethtool "$netdev" |grep 'Speed:' | grep -o '[0-9]*')
 	CURRENT_DUPLEX=$(ethtool "$netdev" |grep 'Duplex:' | grep -o '[A-Za-z]*$')
