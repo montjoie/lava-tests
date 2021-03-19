@@ -172,6 +172,9 @@ if [ $? -ne 0 ];then
 	exit 1
 fi
 
+# print version
+grep -iao 'U-Boot[[:space:]]*[0-9][0-9]*.[0-9a-z.-]*[[:space:]]*([^)]*)' uboot-$MACHINE_MODEL_
+
 case $FLASH_METHOD in
 sunxi)
 	dd if=uboot-$MACHINE_MODEL_ of=$BOOT_DEV bs=8k seek=1
