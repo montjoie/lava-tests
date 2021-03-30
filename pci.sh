@@ -9,5 +9,5 @@ if [ ! -e /sys/bus/pci ];then
 fi
 
 start_test "Run lspci"
-lspci
+lspci -v
 result $? "lspci"
