@@ -267,7 +267,7 @@ emerge --nospinner --quiet --color n -v dev-vcs/git -bkp
 emerge --nospinner --quiet --color n -v dev-vcs/git -bk
 result $? "test-gentoo-install-git"
 
-if [ ! -e /usr/local/portage ];then
+if [ ! -e /usr/local/portage/metadata ];then
 	start_test "Deploy custom portage"
 	git clone --quiet https://github.com/montjoie/montjoiegentooportage.git /usr/local/portage
 	result $? "test-gentoo-local-portage"
