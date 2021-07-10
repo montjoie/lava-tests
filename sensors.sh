@@ -18,6 +18,10 @@ do
 done
 echo "DEBUG: end thermal"
 
+start_test "Run sensors-detect"
+sensors-detect --auto
+result $? "sensors-detect"
+
 ls /sys/class/hwmon/ > /sensor.list
 if [ ! -s /sensor.list ];then
 	result SKIP "sensor"
