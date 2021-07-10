@@ -12,11 +12,6 @@ run:
       - chmod +x ./rtc.sh
       - ./rtc.sh
       - lava-test-set stop test-RTC
-      - echo "I2C tests"
-      - lava-test-set start test-i2c
-      - chmod +x ./i2c.sh
-      - ./i2c.sh
-      - lava-test-set stop test-i2c
       - echo "Sensors tests"
       - lava-test-set start test-sensors
       - chmod +x ./sensors.sh
@@ -27,5 +22,10 @@ run:
       - chmod +x ./nvmem.sh
       - ./nvmem.sh
       - lava-test-set stop test-nvmems
+      - echo "I2C tests"
+      - lava-test-set start test-i2c
+      - chmod +x ./i2c.sh
+      - ./i2c.sh
+      - lava-test-set stop test-i2c
       - chmod +x ./final.sh
       - ./final.sh
