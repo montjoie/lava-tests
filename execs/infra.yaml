@@ -1,13 +1,31 @@
 metadata:
   name: Montjoie tests
   format: "Lava-Test-Shell Test Definition 1.0"
-  description: "Verify LAVA network"
+  description: "Montjoie test"
   version: 1.0
 run:
     steps:
-      - sleep 10
-      - echo "Network tests"
-      - lava-test-set start test-network
-      - chmod +x ./infra.sh
-      - ./infra.sh
-      - lava-test-set stop test-network
+      - chmod +x ./start.sh
+      - ./start.sh
+      - echo "RTC tests"
+      - lava-test-set start test-RTC
+      - chmod +x ./rtc.sh
+      - ./rtc.sh
+      - lava-test-set stop test-RTC
+      - echo "I2C tests"
+      - lava-test-set start test-i2c
+      - chmod +x ./i2c.sh
+      - ./i2c.sh
+      - lava-test-set stop test-i2c
+      - echo "Sensors tests"
+      - lava-test-set start test-sensors
+      - chmod +x ./sensors.sh
+      - ./sensors.sh
+      - lava-test-set stop test-sensors
+      - echo "EEPROM/NVMEM tests"
+      - lava-test-set start test-nvmems
+      - chmod +x ./nvmem.sh
+      - ./nvmem.sh
+      - lava-test-set stop test-nvmems
+      - chmod +x ./final.sh
+      - ./final.sh
