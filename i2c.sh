@@ -28,10 +28,11 @@ do
 	while read -r address
 	do
 		start_test "Dump I2C bus $i address $address"
+		echo "DEBUG: try address $address"
 		i2cget -f -y "$i" "0x$address" 0
 		result $? "test-i2c-get-$i-$address"
-		#start_test "Dump I2C bus $i address $address"
-		i2cget -f -y "$i" "0x$address" i
-		#result $? "test-i2c-get-$i-$address"
+		start_test "Dump I2C bus $i address $address"
+		i2cget -f -y "$i" "0x$address" $i
+		result $? "test-i2c-get-$i-$address"
 	done
 done
