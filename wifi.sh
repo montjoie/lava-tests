@@ -25,6 +25,17 @@ result $? "wifi-wpa"
 
 test_wifi_interface() {
 	netdev=$1
+
+	WASUP=0
+	ip link show $netdev |grep -q UP
+	if [ $? -eq 0 ];then
+		echo "DEBUG: $netdev is already up"
+		WASUP=1
+	else
+		echo "DEBUG: bring $netdev up"
+		ip link set dev $netdev up
+	fi
+
 	start_test "Run iwlist scanning"
 	iwlist $netdev scanning
 	result $? "wifi-iwlist-scanning-$netdev"
@@ -37,6 +48,10 @@ test_wifi_interface() {
 	iwlist $netdev channel
 	result $? "wifi-iwlist-channel-$netdev"
 
+	if [ $WASUP -eq 0 ];then
+		echo "DEBUG: bring $netdev down"
+		ip link set dev $netdev down
+	fi
 }
 
 for f in /sys/class/net/*
