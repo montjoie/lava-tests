@@ -7,6 +7,11 @@ run:
     steps:
       - chmod +x ./start.sh
       - ./start.sh
+      - echo "Wifi tests"
+      - lava-test-set start test-wifi
+      - chmod +x ./wifi.sh
+      - ./wifi.sh
+      - lava-test-set stop test-wifi
       - echo "RTC tests"
       - lava-test-set start test-RTC
       - chmod +x ./rtc.sh
