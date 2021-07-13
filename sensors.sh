@@ -54,8 +54,12 @@ do
 	for capt in $(ls /sys/class/hwmon/$sensor/*_input | sed 's,^.*/,,' | sed 's,_input,,')
 	do
 		echo "DEBUG: found capteur $capt"
+		UNITS="unk"
+		echo $capt | grep -q 'temp' && UNITS="mC"
+		echo $capt | grep -q 'in' && UNITS="mV"
+		echo $capt | grep -q 'curr' && UNITS="mA"
 		V="$(cat /sys/class/hwmon/$sensor/${capt}_input)"
-		lava-test-case "sensor-$NAME-$capt" --result pass --measurement $V --units milidegC
+		lava-test-case "sensor-$NAME-$capt" --result pass --measurement $V --units "$UNITS"
 	done
 	result $RET "sensor-$NAME"
 done
