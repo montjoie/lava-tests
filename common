@@ -138,6 +138,14 @@ get_machine_model() {
 	echo "===MACHINEMODEL==="
 	echo $MACHINE_MODEL_
 	echo "===MACHINEMODEL_END==="
+	echo $MACHINE_MODEL_ | grep -qE 'sun50i-h6'
+	if [ $? -eq 0 ];then
+		SOC=H6
+	fi
+	grep -qE 'sun50i-h6' /sys/firmware/devicetree/base/compatible
+	if [ $? -eq 0 ];then
+		SOC=H6
+	fi
 	echo $MACHINE_MODEL_ | grep -qE 'sun50i-a64|BananaPi-M64'
 	if [ $? -eq 0 ];then
 		SOC=a64
