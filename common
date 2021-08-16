@@ -150,7 +150,7 @@ get_machine_model() {
 	if [ $? -eq 0 ];then
 		SOC=a64
 	fi
-	echo $MACHINE_MODEL_ | grep -qE 'A20|sun7i-a20|a20-olinuxino'
+	echo $MACHINE_MODEL_ | grep -qE 'A20|sun7i-a20|a20-olinuxino|Cubietech_Cubieboard2'
 	if [ $? -eq 0 ];then
 		SOC=a20
 	fi

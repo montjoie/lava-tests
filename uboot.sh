@@ -29,7 +29,7 @@ aarch64)
 	fi
 ;;
 *)
-	echo "ERROR: uboot not handled on x86"
+	echo "ERROR: uboot not handled on $(uname -m)"
 	exit 1
 ;;
 esac
