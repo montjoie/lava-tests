@@ -142,6 +142,10 @@ get_machine_model() {
 	if [ $? -eq 0 ];then
 		SOC=H6
 	fi
+	grep -qE 'sun8i-h2-plus' /sys/firmware/devicetree/base/compatible
+	if [ $? -eq 0 ];then
+		SOC=H2plus
+	fi
 	grep -qE 'sun50i-h6' /sys/firmware/devicetree/base/compatible
 	if [ $? -eq 0 ];then
 		SOC=H6
