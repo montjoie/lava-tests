@@ -28,6 +28,17 @@ aarch64)
 		exit 1
 	fi
 ;;
+arc)
+	mkdir -p /mnt/hsdk || exit $?
+	wget $UBOOT_BIN_URL/u-boot-update.scr || exit $?
+	wget $UBOOT_BIN_URL/u-boot.head || exit $?
+	mount /dev/mmcblk0p1 /mnt/hsdk || exit $?
+	mv u-boot.head /mnt/hsdk/ || exit $?
+	mv u-boot-update.scr /mnt/hsdk/ || exit $?
+	umount /mnt/hsdk
+	sync
+	exit 0
+;;
 *)
 	echo "ERROR: uboot not handled on $(uname -m)"
 	exit 1
