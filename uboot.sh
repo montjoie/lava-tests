@@ -155,6 +155,23 @@ do
 			echo "Unknown controller"
 		esac
 	;;
+	H5)
+		FLASH_METHOD="sunxi"
+		case $cblock in
+		1c0f000.mmc)
+			echo "Controller is SD"
+			BOOT_DEV=/dev/$block
+		;;
+		1c10000.mmc)
+			echo "Controller is SDIO"
+		;;
+		1c11000.mmc)
+			echo "Controller is SMHC2 EMMC"
+		;;
+		*)
+			echo "Unknown controller"
+		esac
+	;;
 	r40)
 		FLASH_METHOD="sunxi"
 		case $cblock in
