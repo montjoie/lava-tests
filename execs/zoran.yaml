@@ -1,0 +1,11 @@
+metadata:
+  name: Montjoie tests
+  format: "Lava-Test-Shell Test Definition 1.0"
+  description: "Montjoie test"
+  version: 1.0
+run:
+    steps:
+      - lava-test-set start test-zoran
+      - chmod +x ./zoran.sh
+      - ./zoran.sh
+      - lava-test-set stop test-zoran
