@@ -45,6 +45,35 @@ arc)
 ;;
 esac
 
+NAND_DEV=""
+echo "DEBUG: enumerate mtd devices"
+cat /proc/mtd
+for block in $(ls /sys/block/ |grep mtd |grep -v 'p[0-9]$')
+do
+	cblock=$(readlink /sys/block/$block | grep -o '/[0-9a-f]*.spi/' | cut -d/ -f2)
+	echo "==============================="
+	echo "INFO: found $block from $cblock"
+	case $SOC in
+	rk3328)
+		case $cblock in
+		ff190000.spi)
+			echo "Controller is NAND"
+			NAND_DEV="$cblock"
+		;;
+		*)
+			echo "Unknown controller"
+			ls -l /sys/block/$block
+			readlink /sys/block/$block
+		;;
+		esac
+	;;
+	*)
+		echo "ERROR: unknow SOC $SOC"
+	;;
+	esac
+
+done
+
 FLASH_METHOD=""
 BOOT_DEV=none
 for block in $(ls /sys/block/ |grep mmc | grep -v boot |grep -v 'p[0-9]$')
@@ -189,8 +218,19 @@ do
 			echo "Unknown controller"
 		esac
 	;;
+	rk3328)
+		FLASH_METHOD="rk3328"
+		case $cblock in
+		ff500000.mmc)
+			echo "Controller is SD"
+			BOOT_DEV=/dev/$block
+		;;
+		*)
+			echo "Unknown controller $cblock"
+		esac
+	;;
 	*)
-		echo "ERROR: unknow SOC"
+		echo "ERROR: unknow SOC $SOC"
 		exit 1
 	;;
 	esac
@@ -211,6 +251,8 @@ fi
 
 mini_network_test
 echo "Will install uboot in $BOOT_DEV"
+
+echo "DEBUG: download uboot-$MACHINE_MODEL_"
 wget $UBOOT_BIN_URL/uboot-$MACHINE_MODEL_
 if [ $? -ne 0 ];then
 	echo "ERROR: fail to download"
@@ -223,6 +265,24 @@ grep -iao 'U-Boot[[:space:]]*[0-9][0-9]*.[0-9a-z.-]*[[:space:]]*([^)]*)' uboot-$
 case $FLASH_METHOD in
 sunxi)
 	dd if=uboot-$MACHINE_MODEL_ of=$BOOT_DEV bs=8k seek=1
+	if [ $? -ne 0 ];then
+		echo "ERROR: uboot flash"
+	fi
+	sync
+;;
+rk3328)
+	# Need additional idbloater
+	echo "DEBUG: download ${MACHINE_MODEL_}-idbloader.img"
+	wget $UBOOT_BIN_URL/${MACHINE_MODEL_}-idbloader.img
+	if [ $? -ne 0 ];then
+		echo "ERROR: fail to download"
+		exit 1
+	fi
+	dd if=${MACHINE_MODEL_}-idbloader.img of=$BOOT_DEV seek=64
+	if [ $? -ne 0 ];then
+		echo "ERROR: uboot flash"
+	fi
+	dd if=uboot-$MACHINE_MODEL_ of=$BOOT_DEV seek=16384
 	if [ $? -ne 0 ];then
 		echo "ERROR: uboot flash"
 	fi
