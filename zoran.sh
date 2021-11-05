@@ -79,16 +79,18 @@ ffmpeg -f v4l2 -list_formats all -i $ZORAN_IN
 result $? "zoran-list-formats"
 
 start_test "Capture from zoran with ffmpeg"
-ffmpeg -hide_banner -loglevel warning -t 20 -f v4l2 -video_size 640x480 -i $ZORAN_IN zoran.mkv
+ffmpeg -hide_banner -loglevel warning -t 5 -f v4l2 -video_size 640x480 -i $ZORAN_IN -vcodec copy zoran.mkv
 result $? "zoran-ffmpeg-capture"
 
 curl -F "filename=zoran.mkv" -F "data=@zoran.mkv" http://192.168.1.22:8088/bin/upload.py
+rm zoran.mkv
 
 start_test "Capture from zoran MJPEG with ffmpeg"
-ffmpeg -hide_banner -loglevel warning -t 20 -f v4l2 -input_format mjpeg -i $ZORAN_IN zoran-mjpeg.mpeg
+ffmpeg -hide_banner -loglevel warning -t 5 -f v4l2 -input_format mjpeg -i $ZORAN_IN -vcodec copy zoran-mjpeg.mkv
 result $? "zoran-ffmpeg-capture-mjpeg"
 
-curl -F "filename=zoran-mjpeg.mpeg" -F "data=@zoran-mjpeg.mpeg" http://192.168.1.22:8088/bin/upload.py
+curl -F "filename=zoran-mjpeg.mkv" -F "data=@zoran-mjpeg.mkv" http://192.168.1.22:8088/bin/upload.py
+rm zoran-mjpeg.mkv
 
 start_test "Test compliance of zoran capture"
 v4l2-compliance --color never -d $ZORAN_IN
@@ -101,3 +103,17 @@ else
 	v4l2-compliance --color never -d $ZORAN_OUT
 	result $? "v4l2-compliance-zoran-output"
 fi
+
+start_test "Set stream to MJPG 768x576"
+v4l2-ctl -d $ZORAN_IN -v pixelformat=MJPG,width=768,height=576
+result $? "v4l2-stream-set-mjpg-768x576"
+start_test "Stream to MJPG 768x576"
+v4l2-ctl -d $ZORAN_IN --stream-mmap --stream-count 10
+result $? "v4l2-stream-mjpg-768x576"
+
+start_test "Set stream to MJPG 768x288"
+v4l2-ctl -d $ZORAN_IN -v pixelformat=MJPG,width=768,height=288
+result $? "v4l2-stream-set-mjpg-768x288"
+start_test "Stream to MJPG 768x288"
+v4l2-ctl -d $ZORAN_IN --stream-mmap --stream-count 10
+result $? "v4l2-stream-mjpg-768x288"
