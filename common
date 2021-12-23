@@ -25,7 +25,20 @@ start_test()
 		echo "$1"
 	fi
 	echo "=============================================="
-	dmesg --console-off
+	if [ ! -e "$OUTPUT_DIR/dmesg.busybox" ];then
+		dmesg --console-off
+		if [ $? -ne 0 ];then
+			# check for dmesg busybox version
+			dmesg --console-off > "$OUTPUT_DIR/dmesg.busybox"
+			echo "DEBUG: check if dmesg is busybox"
+			grep -i busybox "$OUTPUT_DIR/dmesg.busybox"
+			if [ $? -eq 0 ];then
+				echo "DEBUG: yes dmesg is busybox"
+			else
+				echo "ERROR: dmesg is not busybox"
+			fi
+		fi
+	fi
 	date +%s > $OUTPUT_DIR/timestamp.test.start
 	dmesg > $OUTPUT_DIR/dmesg.test.start
 	RET=$?
@@ -343,4 +356,13 @@ mini_network_test() {
 		grep nameserver /proc/net/pnp > /etc/resolv.conf
 	fi
 	chmod 644 /etc/resolv.conf
+}
+
+check_proc() {
+	NAME="$1"
+	shift
+
+	start_test "Check process $NAME"
+	ps aux |grep -v grep | grep "$*"
+	result $? "process-$NAME"
 }
