@@ -338,19 +338,6 @@ done
 #/sbin/mii-tool eth0
 #result SKIP "mii-tool"
 
-if [ -z "$IPERF_HOST" ];then
-	IPERF_HOST='iperf.lava.local'
-fi
-
-start_test "Detect an iperf server"
-ping -c4 "$IPERF_HOST"
-RET=$?
-if [ $RET -eq 0 ];then
-	/usr/bin/iperf3 -c "$IPERF_HOST"
-	result $? "iperf"
-	# TODO analyze results
-else
-	result SKIP "iperf"
-fi
+do_iperf auto network
 
 # TODO check counter ifconfig

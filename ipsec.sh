@@ -100,12 +100,14 @@ ping -c4 ipsec.lava.local
 result $? "ipsec-ping"
 
 start_test "IPSEC: iperf TCP"
-iperf3 --port 5201 -c ipsec.lava.local
+iperf3 --port 5201 -c ipsec.lava.local -V
 result $? "ipsec-iperf-tcp"
+do_iperf ipsec.lava.local ipsec-tcp --port 5201
 
 start_test "IPSEC: iperf udp"
-iperf3 --udp --port 5201 -c ipsec.lava.local
+iperf3 --udp --port 5201 -c ipsec.lava.local -V
 result $? "ipsec-iperf-udp"
+do_iperf ipsec.lava.local ipsec-udp --udp --port 5201
 
 start_test "IPSEC: getstat new"
 getstat > getstat.new

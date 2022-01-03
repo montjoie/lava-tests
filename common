@@ -394,3 +394,68 @@ get_interrupts() {
 	echo "DEBUG: IRQs for $1 is $TOTAL"
 }
 
+do_iperf() {
+	case $1 in
+	auto)
+		shift
+		TESTNAME="$1"
+		shift
+		start_test "Detect an iperf server"
+		if [ -z "$IPERF_HOST" ];then
+			IPERF_HOST='iperf.lava.local'
+		fi
+		ping -c4 "$IPERF_HOST"
+		RET=$?
+		if [ $RET -ne 0 ];then
+			echo "DEBUG: cannot found an iperf server"
+			result skip "$TESTNAME-iperf-skip"
+			return 0
+		fi
+		IPERF_ARGS="$* --json"
+		echo "DEBUG: will do iperf on $IPERF_HOST with $IPERF_ARGS"
+	;;
+	*)
+		IPERF_HOST="$1"
+		shift
+		TESTNAME="$1"
+		shift
+		IPERF_ARGS="$* --json"
+		echo "DEBUG: will do iperf on $IPERF_HOST with $IPERF_ARGS"
+	;;
+	esac
+
+	/usr/bin/iperf3 -c "$IPERF_HOST" $IPERF_ARGS |grep -E 'bits_per_second|host_total' > "$OUTPUT_DIR/iperf.out"
+	RET=$?
+
+	sed -i 's,^[[:space:]]*,,' "$OUTPUT_DIR/iperf.out"
+	sed -i 's,[[:space:]]*[[:space:]], ,g' "$OUTPUT_DIR/iperf.out"
+	sed -i 's/,$//' "$OUTPUT_DIR/iperf.out"
+	sed -i 's,:[[:space:]]*,:,' "$OUTPUT_DIR/iperf.out"
+
+	grep host_total "$OUTPUT_DIR/iperf.out"
+	HOST_TOTAL=$(grep host_total "$OUTPUT_DIR/iperf.out" | cut -d: -f2 | grep -o '^[0-9]*.[0-9][0-9]')
+	lava-test-case "$TESTNAME-iperf-host-cpu" --result pass --measurement $HOST_TOTAL --units "per_cent_cpu"
+
+	grep bits_per_second "$OUTPUT_DIR/iperf.out" | head -n20 | cut -d: -f2 | cut -d. -f1 > "$OUTPUT_DIR/iperf.bits"
+	TOTAL=0
+	while read line
+	do
+		#echo "DEBUG: Add $line to $TOTAL"
+		TOTAL=$(($TOTAL+$line))
+	done < "$OUTPUT_DIR/iperf.bits"
+	echo "DEBUG: TOTAL is $TOTAL"
+	MOYENNE=$(($TOTAL/20))
+	echo "DEBUG: MOYENNE is $MOYENNE"
+	UNITS="bits_per_s"
+	if [ $MOYENNE -ge 1024 ];then
+		MOYENNE=$(($MOYENNE/1024))
+		UNITS="kbits_per_s"
+	fi
+	if [ $MOYENNE -ge 1024 ];then
+		MOYENNE=$(($MOYENNE/1024))
+		UNITS="mbits_per_s"
+	fi
+	lava-test-case "$TESTNAME-iperf-bits-per-second" --result pass --measurement $MOYENNE --units "$UNITS"
+
+	return 0
+}
