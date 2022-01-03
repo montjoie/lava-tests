@@ -366,3 +366,31 @@ check_proc() {
 	ps aux |grep -v grep | grep "$*"
 	result $? "process-$NAME"
 }
+
+get_interrupts() {
+	echo "DEBUG: ============ IRQ $1 ================="
+	grep "$1" /proc/interrupts
+	_NLINES=$(grep "$1" /proc/interrupts | wc -l)
+	if [ $_NLINES -eq 0 ];then
+		echo "ERROR: $1 not found"
+		return 1
+	fi
+	if [ $_NLINES -ge 2 ];then
+		echo "ERROR: $1 give too many lines"
+		return 1
+	fi
+	echo "DEBUG: ============ IRQ $1 ================="
+	RAWN=$(grep "$1" /proc/interrupts | \
+		sed 's,[[:space:]][[:space:]]*, ,g' |\
+		sed 's,^[[:space:]]*[0-9]*:[[:space:]]*,,' |\
+		sed 's,[a-zA-Z].*$,,')
+	TOTAL=0
+	#echo "DEBUG: RAW: $RAWN"
+	for nstat in $RAWN
+	do
+		#echo "DEBUG: Add $nstat to $TOTAL"
+		TOTAL=$(($TOTAL+$nstat))
+	done
+	echo "DEBUG: IRQs for $1 is $TOTAL"
+}
+
