@@ -72,6 +72,9 @@ start_test "Test DNS"
 ping -c4 dns.google.com
 result $? "dns"
 
+iperf3 -c iperf.lava.local -V
+do_iperf auto network
+
 # test an ethtool command
 # arg1: return code for not supported (see ethtool code source)
 # arg2: summary of the command
