@@ -338,6 +338,7 @@ done
 #/sbin/mii-tool eth0
 #result SKIP "mii-tool"
 
+iperf3 -c iperf.lava.local -V
 do_iperf auto network
 
 # TODO check counter ifconfig
