@@ -117,6 +117,10 @@ test_interface() {
 		return 0
 	fi
 
+	start_test "Run ethtool for $netdev"
+	ethtool "$netdev"
+	result $? "network-$netdev-ethtool-basic"
+
 	start_test "Get features list from $netdev"
 	ethtool -k "$netdev"
 	result $? "network-$netdev-ethtool-features-list"
