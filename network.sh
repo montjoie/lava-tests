@@ -142,8 +142,13 @@ test_interface() {
 		return 0
 	fi
 	echo "DEBUG: disruptive test begin on $netdev"
-	#TODO detect if interface got an IP
-	NETDEV_HAS_IP=1
+
+	ip a show "$netdev" | grep -q 'inet '
+	if [ $? -eq 0 ];then
+		NETDEV_HAS_IP=1
+	else
+		NETDEV_HAS_IP=0
+	fi
 	# test mtu change
 	#ifconfig eth0 mtu 1400
 	ip link show $netdev > $OUTPUT_DIR/iplink
@@ -203,7 +208,7 @@ test_interface() {
 		sleep 5
 		ip a |grep -q 192.168
 		if [ $? -ne 0 ];then
-			ip a add 192.168.1.204 dev $netdev
+			ip a add 192.168.1.204/24 dev $netdev
 			ip route add default gw 192.168.1.1
 		fi
 		ip a
