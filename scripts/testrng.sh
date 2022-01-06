@@ -35,7 +35,7 @@ sun8i-ce-prng)
 	test_rng_more
 ;;
 *)
-	echo "ERROR: unknow RNG"
+	echo "ERROR: unknow RNG $DRIVER"
 ;;
 esac
 
