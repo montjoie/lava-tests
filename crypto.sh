@@ -93,6 +93,8 @@ else
 	fi
 fi
 
+print_crypto_stat
+
 kcapi-rng --version
 RET=$?
 if [ $RET -eq 0 ];then

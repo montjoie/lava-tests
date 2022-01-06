@@ -228,9 +228,21 @@ print_crypto_stat()
 		echo "DEBUG: test cryptostat $dirstat"
 		if [ -e /sys/kernel/debug/$dirstat/stats ];then
 			cat /sys/kernel/debug/$dirstat/stats
-			if [ "$dirstart" = 'sun4i-ss' ];then
-				get_interrupts dma
-			fi
+			case "$dirstat" in
+			sun4i-ss)
+				get_interrupts dma-controller
+				get_interrupts sun4i-ss
+			;;
+			sun8i-ce)
+				get_interrupts sun8i-ce
+			;;
+			sun8i-ss)
+				get_interrupts sun8i-ss
+			;;
+			*)
+				echo "DEBUG: no test for interrupts for $dirstat"
+			;;
+			esac
 		fi
 	done
 	find /sys/kernel/debug/ |grep -i caam
