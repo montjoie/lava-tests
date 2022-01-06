@@ -228,6 +228,9 @@ print_crypto_stat()
 		echo "DEBUG: test cryptostat $dirstat"
 		if [ -e /sys/kernel/debug/$dirstat/stats ];then
 			cat /sys/kernel/debug/$dirstat/stats
+			if [ "$dirstart" = 'sun4i-ss' ];then
+				get_interrupts dma
+			fi
 		fi
 	done
 	find /sys/kernel/debug/ |grep -i caam
