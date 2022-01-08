@@ -409,6 +409,7 @@ get_interrupts() {
 	echo "DEBUG: IRQs for $1 is $TOTAL"
 }
 
+# TODO handle "error - the server is busy running a test. try again late"
 do_iperf() {
 	case $1 in
 	auto)
@@ -441,6 +442,13 @@ do_iperf() {
 
 	/usr/bin/iperf3 -c "$IPERF_HOST" $IPERF_ARGS |grep -E 'bits_per_second|host_total' > "$OUTPUT_DIR/iperf.out"
 	RET=$?
+
+	grep -q 'error - the server is busy running a test. try again late' "$OUTPUT_DIR/iperf.out"
+	if [ $? -eq 0 ];then
+		sleep 10
+		do_iperf "$IPERF_HOST" "$TESTNAME" $*
+		return $?
+	fi
 
 	sed -i 's,^[[:space:]]*,,' "$OUTPUT_DIR/iperf.out"
 	sed -i 's,[[:space:]]*[[:space:]], ,g' "$OUTPUT_DIR/iperf.out"

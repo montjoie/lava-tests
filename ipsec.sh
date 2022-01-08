@@ -7,9 +7,6 @@ if [ $RET -eq 0 ];then
 	exit 0
 fi
 
-SRC=192.168.1.0/24
-DST=iperf.lava.local
-
 . ./common
 
 check_config INET_AH
