@@ -30,10 +30,9 @@ result 0 "ipsec-xfrm-state"
 
 ping -c4 ipsec.lava.local
 RET=$?
-#if [ $RET -ne 0 ];then
-	#result SKIP "ipsec"
-	#exit 0
-#fi
+if [ $RET -eq 0 ];then
+	echo "ERROR: ping should not work without ipsec"
+fi
 
 start_test "get strongswan version"
 ipsec version
