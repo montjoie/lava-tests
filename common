@@ -423,6 +423,13 @@ do_iperf() {
 		ping -c4 "$IPERF_HOST"
 		RET=$?
 		if [ $RET -ne 0 ];then
+			ip a | grep -q "inet 10.2"
+			if [ $? -eq 0 ];then
+				RET=0
+				IPERF_HOST="10.1.1.17"
+			fi
+		fi
+		if [ $RET -ne 0 ];then
 			echo "DEBUG: cannot found an iperf server"
 			result skip "$TESTNAME-iperf-skip"
 			return 0
