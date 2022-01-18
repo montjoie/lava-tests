@@ -404,6 +404,7 @@ if [ "$(uname -m)" = 'armv7l' ];then
 	#myquickpkg net-dns/libidn2
 	#myquickpkg dev-python/certifi
 	#myquickpkg dev-python/setuptools
+	myquickpkg acct-group/sshd
 	start_test "pretend upgrade glibc"
 	emerge --nospinner --quiet --color n -v -pvbk1 glibc
 	emerge --nospinner --quiet --color n -v -vbk1 glibc
