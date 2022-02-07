@@ -6,9 +6,12 @@ export
 
 LUKS_PASS="$1"
 
+DROPBEAR=0
+
 check_proc crond crond
 check_proc sshd sshd
 check_proc ssh ssh
+check_proc ssh dropbear
 check_proc openvpn openvpn
 check_proc ntpd ntpd
 
@@ -21,6 +24,14 @@ result $? "gemini-openvpn-version"
 start_test "Check sshd version"
 sshd --version
 result $? "gemini-sshd-version"
+
+start_test "Check dropbear version"
+dropbear -V
+RET=$?
+if [ $RET -eq 0 ];then
+	DROPBEAR=1
+fi
+result $RET "gemini-dropbear-version"
 
 start_test "Check rsync version"
 rsync --version
@@ -63,12 +74,22 @@ if [ $? -eq 0 ];then
 	cat /root/.ssh/authorized_keys
 	chmod 600 /root/.ssh/id_rsa
 
-	ssh-keyscan ssh.lava.local >> "/root/.ssh/known_hosts"
+	SSH_OPTS=""
+	if [ $DROPBEAR -eq 0 ];then
+		ssh-keyscan ssh.lava.local >> "/root/.ssh/known_hosts"
+		SSH_OPTS="-o 'StrictHostKeyChecking no'"
+	else
+		SSH_OPTS="-y "
+		wget -q http://ssh.lava.local/id_dropbear
+		mv id_dropbear /root/.ssh/
+		#dropbearconvert openssh dropbear /root/.ssh/id_rsa /root/.ssh/id_dropbear
+	fi
+
 	start_test "Test ssh output"
-	ssh -o 'StrictHostKeyChecking no' lavatest@ssh.lava.local 'uname -a'
+	ssh $SSH_OPTS lavatest@ssh.lava.local 'uname -a'
 	result $? "gemini-ssh-output"
 	start_test "Test ssh incoming"
-	ssh -o 'StrictHostKeyChecking no' lavatest@ssh.lava.local "ssh  -o 'StrictHostKeyChecking no' root@192.168.1.220 'uname -a'"
+	ssh $SSH_OPTS lavatest@ssh.lava.local "ssh  -o 'StrictHostKeyChecking no' root@192.168.1.220 'uname -a'"
 	result $? "gemini-ssh-incoming"
 
 	start_test "Test scp"
