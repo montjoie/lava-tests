@@ -223,11 +223,18 @@ print_crypto_stat()
 {
 	echo "DEBUG: check for crypto stats"
 	mount -t debugfs none /sys/kernel/debug
-	for dirstat in gxl-crypto amlogic-crypto sun8i-ce sun8i-ss sun4i-ss
+	for dirstat in gxl-crypto amlogic-crypto sun8i-ce sun8i-ss sun4i-ss rk3288_crypto
 	do
 		echo "DEBUG: test cryptostat $dirstat"
 		if [ -e /sys/kernel/debug/$dirstat/stats ];then
 			cat /sys/kernel/debug/$dirstat/stats
+			if [ $OUTPUT_DIR/stats_$dirstat ];then
+				cat /sys/kernel/debug/$dirstat/stats > $OUTPUT_DIR/stats_$dirstat.new
+				diff -u $OUTPUT_DIR/stats_$dirstat $OUTPUT_DIR/stats_$dirstat.new
+				mv $OUTPUT_DIR/stats_$dirstat.new $OUTPUT_DIR/stats_$dirstat
+			else
+				cat /sys/kernel/debug/$dirstat/stats > $OUTPUT_DIR/stats_$dirstat
+			fi
 			case "$dirstat" in
 			sun4i-ss)
 				get_interrupts dma-controller
