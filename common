@@ -253,6 +253,9 @@ print_crypto_stat()
 		fi
 	done
 	find /sys/kernel/debug/ |grep -i caam
+	if [ -e /sys/kernel/debug/dma-api/dump ];then
+		grep -vE 'rk_gmac-dwmac|dwmac-sun8i' /sys/kernel/debug/dma-api/dump
+	fi
 	echo "DEBUG: end of stats"
 }
 
