@@ -1,0 +1,12 @@
+metadata:
+  name: Montjoie tests
+  format: "Lava-Test-Shell Test Definition 1.0"
+  description: "Montjoie test"
+  version: 1.0
+run:
+  steps:
+    - echo "libkcapi tests"
+    - lava-test-set start test-libkcapi
+    - chmod +x ./libkcapi.sh
+    - ./libkcapi.sh
+    - lava-test-set stop test-libkcapi
