@@ -1,5 +1,6 @@
 #!/bin/sh
 
+NOACT=0
 while [ $# -ge 1 ]
 do
 	case $1 in
@@ -18,6 +19,10 @@ do
 			echo "DEBUG: OS IMAGE TO FLASH $OS_IMAGE_URL"
 		fi
 		shift
+	;;
+	-n)
+		shift
+		NOACT=1
 	;;
 	*)
 		echo "ERROR: unknow argument $1"
@@ -281,11 +286,59 @@ fi
 
 # armbian flash
 if [ ! -z "$OS_IMAGE_URL" ];then
-	wget "$OS_IMAGE_URL"
+	#fdisk -l
+	#mkdir /armbian
+	#mount ${BOOT_DEV}p1 /armbian
+	#touch /armbian/root/.not_logged_in_yet
+	#touch /armbian/root/.not_logged_in
+	#ls -l /armbian/
+	#ls -la /armbian/root/
+	#grep -ri not_logged_in /armbian/etc/
+	#umount /armbian
+	#sync
+	#exit 0
+	echo "DEBUG: downloading $OS_IMAGE_URL"
+	OPWD=$(pwd)
+	cd /tmp/
+	wget -q --no-check-certificate "$OS_IMAGE_URL"
+	if [ $? -ne 0 ];then
+		echo "ERROR: fail to wget"
+		exit 1
+	fi
+
 	IMAGE=$(ls |grep Armbian)
-	xzcat -V
+	if [ -z "$IMAGE" ];then
+		echo "ERROR: could not find IMAGE"
+		exit 1
+	fi
+	sha256sum $IMAGE
+	ls -lh
+	ls -l
+	df -h
+	echo "DEBUG: try to download sha256"
+	wget -q --no-check-certificate "${OS_IMAGE_URL}.sha"
+	if [ $? -ne 0 ];then
+		echo "ERROR: fail to wget sha"
+	fi
+	if [ -e $IMAGE.sha ];then
+		sha256sum -c $IMAGE.sha
+		if [ $? -ne 0 ];then
+			echo "ERROR: sha256sum is bad"
+			exit 1
+		fi
+	fi
+
+	echo $IMAGE |grep xz
+	if [ $? -eq 0 ];then
+		echo "DEBUG: $IMAGE is xz compressed"
+		xzcat -V
+	fi
+	if [ $NOACT -eq 1 ];then
+		BOOT_DEV="/dev/null"
+	fi
 	echo "DEBUG: will flash via xzcat $IMAGE > $BOOT_DEV"
-	exit 0
+	xzcat $IMAGE > $BOOT_DEV
+	exit $?
 fi
 
 if [ -z "$UBOOT_BIN_URL" ];then
