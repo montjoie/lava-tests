@@ -251,6 +251,21 @@ do
 			echo "Unknown controller $cblock"
 		esac
 	;;
+	s905x)
+		FLASH_METHOD="amlogic"
+		case $cblock in
+		d0072000.mmc)
+			echo "Controller is SD"
+			BOOT_DEV=/dev/$block
+		;;
+		d0074000.mmc)
+			echo "Controller is SDIO"
+		;;
+		*)
+			echo "Unknown controller $cblock"
+		;;
+		esac
+	;;
 	*)
 		echo "ERROR: unknow SOC $SOC"
 		exit 1

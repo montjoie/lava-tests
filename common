@@ -171,6 +171,10 @@ get_machine_model() {
 	if [ $? -eq 0 ];then
 		SOC=H6
 	fi
+	grep -qE 's905x' /sys/firmware/devicetree/base/compatible
+	if [ $? -eq 0 ];then
+		SOC=s905x
+	fi
 	echo $MACHINE_MODEL_ | grep -qE 'sun50i-a64|BananaPi-M64'
 	if [ $? -eq 0 ];then
 		SOC=a64
