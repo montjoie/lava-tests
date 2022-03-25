@@ -1,8 +1,30 @@
 #!/bin/sh
 
-if [ ! -z "$1" ];then
-	UBOOT_BIN_URL="$1"
-fi
+while [ $# -ge 1 ]
+do
+	case $1 in
+	--uboot)
+		shift
+		if [ "$1" != 'unset' ];then
+			UBOOT_BIN_URL="$1"
+			echo "DEBUG: UBOOT IMAGE TO FLASH $UBOOT_BIN_URL"
+		fi
+		shift
+	;;
+	--osimage)
+		shift
+		if [ "$1" != 'unset' ];then
+			OS_IMAGE_URL="$1"
+			echo "DEBUG: OS IMAGE TO FLASH $OS_IMAGE_URL"
+		fi
+		shift
+	;;
+	*)
+		echo "ERROR: unknow argument $1"
+		exit 1
+	;;
+	esac
+done
 
 . ./common
 
@@ -239,6 +261,15 @@ done
 
 if [ ! -e $BOOT_DEV ];then
 	echo "ERROR: do not find boot device"
+	exit 0
+fi
+
+# armbian flash
+if [ ! -z "$OS_IMAGE_URL" ];then
+	wget "$OS_IMAGE_URL"
+	IMAGE=$(ls |grep Armbian)
+	xzcat -V
+	echo "DEBUG: will flash via xzcat $IMAGE > $BOOT_DEV"
 	exit 0
 fi
 

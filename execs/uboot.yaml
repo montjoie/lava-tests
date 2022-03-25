@@ -8,7 +8,8 @@ run:
       - echo "UBOOT upgrade"
       - lava-test-set start test-uboot
       - chmod +x ./uboot.sh
-      - ./uboot.sh $UBOOT_BIN_URL
+      - ./uboot.sh --uboot $UBOOT_BIN_URL --osimage $OS_IMAGE_URL
       - lava-test-set stop test-uboot
 params:
-  UBOOT_BIN_URL: ""
+  UBOOT_BIN_URL: "unset"
+  OS_IMAGE_URL: "unset"
