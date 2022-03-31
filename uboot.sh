@@ -362,6 +362,20 @@ fi
 grep -iao 'U-Boot[[:space:]]*[0-9][0-9]*.[0-9a-z.-]*[[:space:]]*([^)]*)' uboot-$MACHINE_MODEL_
 
 case $FLASH_METHOD in
+amlogic)
+	if [ $NOACT -eq 1 ];then
+		BOOT_DEV="/dev/null"
+	fi
+	dd if=uboot-$MACHINE_MODEL_ of=$BOOT_DEV conv=fsync,notrunc bs=512 skip=1 seek=1
+	if [ $? -ne 0 ];then
+		echo "ERROR: uboot flash to $BOOT_DEV"
+	fi
+	dd if=uboot-$MACHINE_MODEL_ of=$BOOT_DEV conv=fsync,notrunc bs=1 count=444
+	if [ $? -ne 0 ];then
+		echo "ERROR: uboot flash to $BOOT_DEV"
+	fi
+	sync
+;;
 sunxi)
 	dd if=uboot-$MACHINE_MODEL_ of=$BOOT_DEV bs=8k seek=1
 	if [ $? -ne 0 ];then
