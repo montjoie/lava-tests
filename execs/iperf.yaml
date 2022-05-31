@@ -1,0 +1,12 @@
+metadata:
+  name: Montjoie tests
+  format: "Lava-Test-Shell Test Definition 1.0"
+  description: "Montjoie test"
+  version: 1.0
+run:
+    steps:
+      - echo "Iperf tests"
+      - lava-test-set start test-iperf
+      - chmod +x ./iperf.sh
+      - ./iperf.sh
+      - lava-test-set stop test-iperf
