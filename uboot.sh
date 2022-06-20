@@ -95,7 +95,7 @@ do
 		esac
 	;;
 	*)
-		echo "ERROR: unknow SOC $SOC"
+		echo "ERROR: unknow SOC $SOC for MTD"
 	;;
 	esac
 
@@ -256,6 +256,21 @@ do
 			echo "Unknown controller $cblock"
 		esac
 	;;
+	s805x)
+		FLASH_METHOD="amlogic"
+		case $cblock in
+		d0072000.mmc)
+			echo "Controller is SD"
+			BOOT_DEV=/dev/$block
+		;;
+		d0074000.mmc)
+			echo "Controller is SDIO"
+		;;
+		*)
+			echo "Unknown controller $cblock"
+		;;
+		esac
+	;;
 	s905x)
 		FLASH_METHOD="amlogic"
 		case $cblock in
@@ -272,7 +287,7 @@ do
 		esac
 	;;
 	*)
-		echo "ERROR: unknow SOC $SOC"
+		echo "ERROR: unknow SOC $SOC for SD"
 		exit 1
 	;;
 	esac
@@ -281,6 +296,8 @@ done
 
 if [ ! -e $BOOT_DEV ];then
 	echo "ERROR: do not find boot device"
+	ls /sys/block/
+	fdisk -l
 	exit 0
 fi
 
