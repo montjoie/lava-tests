@@ -105,7 +105,12 @@ FLASH_METHOD=""
 BOOT_DEV=none
 for block in $(ls /sys/block/ |grep mmc | grep -v boot |grep -v 'p[0-9]$')
 do
-	cblock=$(readlink /sys/block/$block | grep -o '/[0-9a-f]*.mmc/' | cut -d/ -f2)
+	cblock=$(readlink /sys/block/$block | grep -oE '/[0-9a-f]*.mmc/|/[0-9a-f]*.sd/' | cut -d/ -f2)
+	if [ -z "$cblock" ];then
+		echo "DEBUG: empty cblock"
+		ls -l /sys/block/
+		readlink /sys/block/$block
+	fi
 	echo "==============================="
 	echo "INFO: found $block from $cblock"
 	case $SOC in
@@ -280,6 +285,21 @@ do
 		;;
 		d0074000.mmc)
 			echo "Controller is SDIO"
+		;;
+		*)
+			echo "Unknown controller $cblock"
+		;;
+		esac
+	;;
+	g12b)
+		FLASH_METHOD="amlogic"
+		case $cblock in
+		ffe05000.sd)
+			echo "Controller is SD"
+			BOOT_DEV=/dev/$block
+		;;
+		ffe07000.mmc)
+			echo "Controller is NAND"
 		;;
 		*)
 			echo "Unknown controller $cblock"
