@@ -1,5 +1,6 @@
 #!/bin/sh
 
+BOOT_DEVTYPE="sd"
 NOACT=0
 while [ $# -ge 1 ]
 do
@@ -23,6 +24,10 @@ do
 	-n)
 		shift
 		NOACT=1
+	;;
+	--nand)
+		BOOT_DEVTYPE="nand"
+		shift
 	;;
 	*)
 		echo "ERROR: unknow argument $1"
@@ -100,6 +105,16 @@ do
 	esac
 
 done
+
+set_boot_dev() {
+	echo "DEBUG: set_boot_dev $1 BOOT_DEVTYPE=$BOOT_DEVTYPE with dev=$2"
+	if [ "$BOOT_DEVTYPE" == "$1" ];then
+		BOOT_DEV="$2"
+	fi
+}
+
+echo "DEBUG: content of /sys/block"
+ls -l /sys/block/
 
 FLASH_METHOD=""
 BOOT_DEV=none
@@ -291,15 +306,32 @@ do
 		;;
 		esac
 	;;
+	g12a)
+		FLASH_METHOD="amlogic"
+		case $cblock in
+		ffe05000.sd)
+			echo "Controller is SD"
+			set_boot_dev sd /dev/$block
+		;;
+		ffe07000.mmc)
+			echo "Controller is NAND"
+			set_boot_dev nand /dev/$block
+		;;
+		*)
+			echo "Unknown controller $cblock"
+		;;
+		esac
+	;;
 	g12b)
 		FLASH_METHOD="amlogic"
 		case $cblock in
 		ffe05000.sd)
 			echo "Controller is SD"
-			BOOT_DEV=/dev/$block
+			set_boot_dev sd /dev/$block
 		;;
 		ffe07000.mmc)
 			echo "Controller is NAND"
+			set_boot_dev nand /dev/$block
 		;;
 		*)
 			echo "Unknown controller $cblock"
