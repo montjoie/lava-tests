@@ -338,6 +338,22 @@ do
 		;;
 		esac
 	;;
+	sm1)
+		FLASH_METHOD="amlogic"
+		case $cblock in
+		ffe05000.sd)
+			echo "Controller is SD"
+			set_boot_dev sd /dev/$block
+		;;
+		ffe07000.mmc)
+			echo "Controller is NAND"
+			set_boot_dev nand /dev/$block
+		;;
+		*)
+			echo "Unknown controller $cblock"
+		;;
+		esac
+	;;
 	*)
 		echo "ERROR: unknow SOC $SOC for SD"
 		exit 1

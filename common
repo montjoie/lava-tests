@@ -207,6 +207,10 @@ get_machine_model() {
 	if [ $? -eq 0 ];then
 		SOC=h3
 	fi
+	echo $MACHINE_MODEL_ | grep -qiE 'SEI610'
+	if [ $? -eq 0 ];then
+		SOC=sm1
+	fi
 }
 
 # test if config is enabled
