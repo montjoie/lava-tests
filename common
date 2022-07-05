@@ -211,6 +211,10 @@ get_machine_model() {
 	if [ $? -eq 0 ];then
 		SOC=sm1
 	fi
+	grep -qiE 'gxbb|nanopi_k2' /sys/firmware/devicetree/base/compatible
+	if [ $? -eq 0 ];then
+		SOC=gxbb
+	fi
 }
 
 # test if config is enabled

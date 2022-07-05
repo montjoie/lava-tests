@@ -338,6 +338,21 @@ do
 		;;
 		esac
 	;;
+	gxbb)
+		FLASH_METHOD="amlogic2"
+		case $cblock in
+		d0072000.mmc)
+			echo "Controller is SD"
+			BOOT_DEV=/dev/$block
+		;;
+		d0074000.mmc)
+			echo "Controller is SDIO"
+		;;
+		*)
+			echo "Unknown controller $cblock"
+		;;
+		esac
+	;;
 	sm1)
 		FLASH_METHOD="amlogic"
 		case $cblock in
@@ -456,6 +471,16 @@ amlogic)
 		echo "ERROR: uboot flash to $BOOT_DEV"
 	fi
 	dd if=uboot-$MACHINE_MODEL_ of=$BOOT_DEV conv=fsync,notrunc bs=1 count=444
+	if [ $? -ne 0 ];then
+		echo "ERROR: uboot flash to $BOOT_DEV"
+	fi
+	sync
+;;
+amlogic2)
+	if [ $NOACT -eq 1 ];then
+		BOOT_DEV="/dev/null"
+	fi
+	dd if=uboot-$MACHINE_MODEL_ of=$BOOT_DEV conv=fsync,notrunc bs=512 seek=1
 	if [ $? -ne 0 ];then
 		echo "ERROR: uboot flash to $BOOT_DEV"
 	fi
