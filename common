@@ -215,6 +215,10 @@ get_machine_model() {
 	if [ $? -eq 0 ];then
 		SOC=gxbb
 	fi
+	grep -qiE 'gxm|vim2' /sys/firmware/devicetree/base/compatible
+	if [ $? -eq 0 ];then
+		SOC=gxm
+	fi
 }
 
 # test if config is enabled

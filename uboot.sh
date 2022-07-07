@@ -353,6 +353,22 @@ do
 		;;
 		esac
 	;;
+	gxm)
+		FLASH_METHOD="amlogic"
+		case $cblock in
+		d0072000.mmc)
+			echo "Controller is SD"
+			set_boot_dev sd /dev/$block
+		;;
+		d0074000.mmc)
+			echo "Controller is NAND"
+			set_boot_dev nand /dev/$block
+		;;
+		*)
+			echo "Unknown controller $cblock"
+		;;
+		esac
+	;;
 	sm1)
 		FLASH_METHOD="amlogic"
 		case $cblock in
