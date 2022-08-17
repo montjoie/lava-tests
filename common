@@ -452,6 +452,7 @@ get_interrupts() {
 
 # TODO handle "error - the server is busy running a test. try again late"
 do_iperf() {
+	BW_REPORT=""
 	case $1 in
 	auto)
 		shift
@@ -483,6 +484,12 @@ do_iperf() {
 		shift
 		TESTNAME="$1"
 		shift
+		if [ "$1" == '--report' ];then
+			shift
+			BW_REPORT="$1"
+			echo "DEBUG: will report measurements to $BW_REPORT"
+			shift
+		fi
 		IPERF_ARGS="$* --json"
 		echo "DEBUG: will do iperf on $IPERF_HOST with $IPERF_ARGS"
 	;;
@@ -527,6 +534,11 @@ do_iperf() {
 		UNITS="mbits_per_s"
 	fi
 	lava-test-case "$TESTNAME-iperf-bits-per-second" --result pass --measurement $MOYENNE --units "$UNITS"
+
+	if [ ! -z "$BW_REPORT" ];then
+		get_machine_model
+		curl -F "name=$MACHINE_MODEL_" -F "mname=$TESTNAME" -F "measurement=$MOYENNE" -F "units=$UNITS" "$BW_REPORT"
+	fi
 
 	return 0
 }

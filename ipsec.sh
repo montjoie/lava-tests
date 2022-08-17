@@ -40,7 +40,10 @@ result $? "ipsec-version"
 
 date
 
+start_test "IPSEC: download cacert"
 wget -q http://ipsec.lava.local/cacert.crt
+result $? "ipsec-download-cacert"
+
 wget -q http://ipsec.lava.local/lava.crt
 wget -q http://ipsec.lava.local/dut.crt
 wget -q http://ipsec.lava.local/dut.key
@@ -95,10 +98,21 @@ start_test "IPSEC: ping via ipsec"
 ping -c4 ipsec.lava.local
 result $? "ipsec-ping"
 
+# the ping has force the tunnel to be setuped, we can check which algo is used now
+start_test "IPSEC: find selected algorithm"
+ipsec statusall > $OUTPUT_DIR/ipsec-statusall
+IPSEC_ALGO=$(grep 'IKE proposal' $OUTPUT_DIR/ipsec-statusall |grep -o 'AES_[A-Z0-9_/]*' | sed 's,/,_,g')
+echo "DEBUG: IPSEC ALGO is $IPSEC_ALGO"
+RET=0
+if [ -z "$IPSEC_ALGO" ];then
+	RET=1
+fi
+result $RET "ipsec-find-algo"
+
 start_test "IPSEC: iperf TCP"
 iperf3 --port 5201 -c ipsec.lava.local -V
 result $? "ipsec-iperf-tcp"
-do_iperf ipsec.lava.local ipsec-tcp --port 5201
+do_iperf ipsec.lava.local ipsec-tcp-{IPSEC_ALGO} --report http://192.168.1.40:8089/bin/bwreport.py --port 5201
 
 start_test "IPSEC: iperf udp"
 iperf3 --udp --port 5201 -c ipsec.lava.local -V
