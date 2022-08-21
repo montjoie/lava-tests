@@ -1,0 +1,139 @@
+#!/bin/sh
+
+. ./common
+
+FTDI=""
+FTDI_2=""
+CH348_0=""
+CH348_1=""
+CH348_2=""
+PL2303=""
+
+echo "DEBUG: doing lsusb"
+lsusb
+
+echo "DUMP USB serial"
+ls -l /dev |grep USB
+
+find /dev -iname 'tty*USB[0-9]' > /tmp/allserial
+while read serial
+do
+	echo "======================================================"
+	VENDORID="$(udevadm info $serial |grep ID_VENDOR_ID | cut -d= -f2)"
+	echo "FOUND $serial $VENDORID"
+	case $VENDORID in
+	0403)
+		FTDI="$serial"
+		echo "INFO: Found FTDI $serial"
+		udevadm info $serial |grep -i serial
+		SERIALID="$(udevadm info $serial |grep ID_SERIAL_SHORT | cut -d= -f2)"
+		case $SERIALID in
+		FTA5GLEL)
+			#PORT2
+			FTDI_2="$serial"
+			echo "INFO: Found FTDI $serial for port 2"
+		;;
+		FTB7JDCO)
+			#PORT0
+			FTDI="$serial"
+			echo "INFO: Found FTDI $serial for port 0"
+		;;
+		*)
+			echo "ERROR: unknow ID"
+		;;
+		esac
+	;;
+	1a86)
+		udevadm info $serial | tee /tmp/udevadm
+		grep -q port0 /tmp/udevadm
+		if [ $? -eq 0 ];then
+			CH348_0="$serial"
+			echo "INFO: Found CH348 PORT 0 $serial"
+		fi
+		grep -q port1 /tmp/udevadm
+		if [ $? -eq 0 ];then
+			CH348_1="$serial"
+			echo "INFO: Found CH348 PORT 1 $serial"
+		fi
+		grep -q port2 /tmp/udevadm
+		if [ $? -eq 0 ];then
+			CH348_2="$serial"
+			echo "INFO: Found CH348 PORT 2 $serial"
+		fi
+		if [ "$serial" = '/dev/ttyCH9344USB0' ];then
+			CH348_0="$serial"
+		fi
+		if [ "$serial" = '/dev/ttyCH9344USB1' ];then
+			CH348_1="$serial"
+		fi
+	;;
+	067b)
+		PL2303="$serial"
+		echo "INFO: Found PL2303 0 $serial"
+		#udevadm info $serial
+	;;
+	esac
+done < /tmp/allserial
+
+if [ -z "$FTDI" ];then
+	echo "ERROR: MISSING FTDI"
+	exit 0
+fi
+if [ -z "$CH348_0" ];then
+	echo "ERROR: MISSING CH348 port 0"
+	exit 0
+fi
+
+echo "TEST with FTDI=$FTDI PL2303=$PL2303 and CH348 port0=$CH348_0 port1=$CH348_1"
+
+setserial -h
+echo "DEBUG: getserial"
+setserial -g $FTDI
+setserial -g $CH348_0
+echo "DEBUG: change baud for FTDI"
+setserial $FTDI baud_base 115200
+echo "DEBUG: change baud for CH348"
+setserial $CH348_0 baud_base 115200
+
+OPTS=""
+if [ ! -z "$CH348_2" -a ! -z "$FTDI_2" ];then
+	OPTS="--port2 $CH348_2 --tport2 $FTDI_2"
+fi
+
+echo "Run testserial $OPTS"
+chmod +x ./testserial.py
+./testserial.py --ftdi "$FTDI" --ch348 "$CH348_0" --pl2303 "$PL2303" --port1 "$CH348_1" $OPTS
+#result $? "testserial"
+
+ls /dev |grep USB
+
+echo "DEBUG: write FTDI"
+echo "test01234567890" > $FTDI
+sleep 5
+
+echo "DEBUG: write CH348"
+echo "test01234567890" > $CH348_0
+
+start_test "rmmod ch348"
+rmmod ch348
+result $? "serial-rmmod"
+sleep 4
+
+start_test "modprobe ch348"
+modprobe ch348
+result $? "serial-modprobe"
+
+echo "DEBUG: getserial"
+setserial -g $FTDI
+setserial -g $CH348_0
+
+#echo "DEBUG: read FTDI"
+#try_run -t 10 cat "$FTDI"
+#sleep 5
+
+#echo "DEBUG: read CH348"
+#try_run -t 10 cat "$CH348"
+
+#sleep 10
+
+dmesg
