@@ -61,6 +61,7 @@ aarch64)
 	fi
 ;;
 arc)
+	echo "DEBUG: spetial HSDK handling"
 	mkdir -p /mnt/hsdk || exit $?
 	wget $UBOOT_BIN_URL/u-boot-update.scr || exit $?
 	wget $UBOOT_BIN_URL/u-boot.head || exit $?
@@ -69,6 +70,19 @@ arc)
 	mv u-boot-update.scr /mnt/hsdk/ || exit $?
 	umount /mnt/hsdk
 	sync
+	exit 0
+;;
+riscv64)
+	echo "DEBUG: spetial RISCV handling"
+	fdisk -l
+	wget $UBOOT_BIN_URL
+	HIFIVEUA00="hifive-unleashed-a00-1.0-2018-03-20.bin"
+	if [ -e "$HIFIVEUA00" ];then
+		echo "DEBUG: dump $HIFIVEUA00 in /dev/mmcblk0p1"
+		cat $HIFIVEUA00 > /dev/mmcblk0p1
+		sync
+	fi
+	ls -l
 	exit 0
 ;;
 *)
