@@ -136,4 +136,13 @@ setserial -g $CH348_0
 
 #sleep 10
 
+chmod 755 ./test2a2.py
+for i in $(seq 1 100);
+do
+	echo "DEBUG: modprobe/rmmod loop $i"
+	./test2a2.py --port0 $CH348_0 --port1 $CH348_1&
+	rmmod ch348
+	modprobe ch348
+done
+
 dmesg
