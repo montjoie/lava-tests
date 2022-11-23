@@ -86,19 +86,47 @@ test_hwrng()
 	if [ "$HWRNG_NAME" = 'none' ];then
 		return 1
 	fi
-	start_test "Check hwrng $HWRNG_NAME"
-	dd if=/dev/hwrng count=1 bs=512 > /dev/null
-	RET=$?
-	result $RET "hwrng-simple-$HWRNG_NAME"
-	rngtest -V
+	#start_test "Check hwrng $HWRNG_NAME"
+	#dd if=/dev/hwrng count=1 bs=512 2>/dev/null >/dev/null
+	#RET=$?
+	#result $RET "hwrng-simple-$HWRNG_NAME"
+	rngtest -V 2>/dev/null >/dev/null
 	RET=$?
 	if [ $RET -eq 0 ];then
-		start_test "Check hwrng with rngtest"
-		dd if=/dev/hwrng count=100 bs=1024 | rngtest
-		result $? "hwrng-rngtest1-$HWRNG_NAME"
-		start_test "Check hwrng with rngtest"
+		#start_test "Check hwrng with rngtest"
+		#dd if=/dev/hwrng count=100 bs=1024 | rngtest
+		#result $? "hwrng-rngtest1-$HWRNG_NAME"
+		#start_test "Check hwrng with rngtest"
 		dd if=/dev/hwrng count=100 bs=2048 | rngtest
-		result $? "hwrng-rngtest2-$HWRNG_NAME"
+		for i in $(seq 1 10)
+		do
+			dd if=/dev/hwrng count=100 bs=4096 | rngtest >$OUTPUT_DIR/rng.out 2>&1
+			echo "=================="
+			cat $OUTPUT_DIR/rng.out
+			echo "=================="
+			grep 'rngtest: FIPS 140-2 successes:' $OUTPUT_DIR/rng.out | sed 's,.*[[:space:]],,' >> $OUTPUT_DIR/okay-$sample
+			grep 'rngtest: FIPS 140-2 failures:' $OUTPUT_DIR/rng.out | sed 's,.*[[:space:]],,' >> $OUTPUT_DIR/fail-$sample
+		done
+		echo "================= okay"
+		cat $OUTPUT_DIR/okay-$sample
+		echo "================= fail"
+		cat $OUTPUT_DIR/fail-$sample
+		SUM=0
+		while read taux
+		do
+			SUM=$(($SUM+$taux))
+		done < $OUTPUT_DIR/okay-$sample
+		echo "SUCCESS: $SUM moyenne=$(($SUM/10))
+		SUM=0
+		while read taux
+		do
+			SUM=$(($SUM+$taux))
+		done < $OUTPUT_DIR/fail-$sample
+		echo "FAIL: $SUM moyenne=$(($SUM/10))
+		#result $? "hwrng-rngtest2-$HWRNG_NAME"
+	else
+		echo "ERROR: rngtest not present"
+		return 1
 	fi
 	return 0
 }
@@ -108,3 +136,22 @@ test_hwrng
 
 print_crypto_stat
 
+test_rk3288_crypto_rng()
+{
+	if [ ! -e /sys/kernel/debug/rk3288_crypto/sample ];then
+		return
+	fi
+
+	for sample in 10 50 100 200 400 500 700 1000 2000
+	do
+		echo "================================================="
+		echo "SAMPLE $sample"
+		echo "================================================="
+		echo $sample > /sys/kernel/debug/rk3288_crypto/sample
+		cat /sys/kernel/debug/rk3288_crypto/sample
+		test_hwrng
+	done
+	print_crypto_stat
+}
+
+test_rk3288_crypto_rng
