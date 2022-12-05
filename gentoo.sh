@@ -101,6 +101,26 @@ echo "MAKEOPTS=-j$(grep --count processor /proc/cpuinfo)" >> /etc/portage/make.c
 echo 'PORTDIR_OVERLAY="/usr/local/portage"' >> /etc/portage/make.conf
 
 echo "======================================================"
+echo "DEBUG: check network and DNS"
+ip a
+cat /etc/resolv.conf
+chmod 644 /etc/resolv.conf
+
+echo "DEBUG: test gateway"
+ping -c1 192.168.1.100
+
+echo "DEBUG: test gateway"
+ping -c1 8.8.8.8
+
+echo "DEBUG: ping github"
+ping -c1 github.com
+if [ $? -ne 0 ];then
+	echo "nameserver 192.168.1.100" > /etc/resolv.conf
+	echo "DEBUG: retry ping github"
+	ping -c1 github.com
+fi
+
+echo "======================================================"
 echo "INFO: fix /lib/modules problem"
 chown -c root:root /lib
 chmod -c 755 /lib
@@ -184,6 +204,10 @@ if [ -e /etc/portage/package.accept_keywords ];then
 else
 	mkdir /etc/portage/package.accept_keywords
 fi
+echo "============================== package.unmask"
+mkdir -p /etc/portage/package.unmask
+echo "net-misc/cfengine" >> /etc/portage/package.unmask/cfengine
+
 echo "============================== package.mask"
 if [ -e /etc/portage/package.mask ];then
 	if [ ! -d /etc/portage/package.mask ];then
@@ -325,6 +349,16 @@ result $? "test-gentoo-cfengine-bootstrap"
 start_test "Boot strap cfengine step 3"
 cf-agent -K -I
 result $? "test-gentoo-cfengine-bootstrap3"
+cat /var/cfengine/promise_summary.log
+rm /var/cfengine/promise_summary.log
+
+start_test "Boot strap cfengine step 4"
+cf-agent -K -I
+result $? "test-gentoo-cfengine-bootstrap4"
+cat /var/cfengine/promise_summary.log
+
+echo "================ final make.conf"
+cat /etc/portage/make.conf
 
 echo "============================"
 /var/cfengine/modules/detect_network -d
