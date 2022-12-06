@@ -34,4 +34,3 @@ def test(s0, s1):
 
 test(args.port0, args.port1)
 
-

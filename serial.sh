@@ -102,8 +102,9 @@ fi
 
 echo "Run testserial $OPTS"
 chmod +x ./testserial.py
+start_test "testserial"
 ./testserial.py --ftdi "$FTDI" --ch348 "$CH348_0" --pl2303 "$PL2303" --port1 "$CH348_1" $OPTS
-#result $? "testserial"
+result $? "testserial"
 
 ls /dev |grep USB
 
@@ -140,7 +141,7 @@ chmod 755 ./test2a2.py
 for i in $(seq 1 100);
 do
 	echo "DEBUG: modprobe/rmmod loop $i"
-	./test2a2.py --port0 $CH348_0 --port1 $CH348_1&
+	#./test2a2.py --port0 $CH348_0 --port1 $CH348_1&
 	rmmod ch348
 	modprobe ch348
 done
