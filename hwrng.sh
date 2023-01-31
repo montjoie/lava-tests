@@ -114,15 +114,17 @@ test_hwrng()
 		SUM=0
 		while read taux
 		do
+			echo "DEBUG: read $taux"
 			SUM=$(($SUM+$taux))
+			echo "DEBUG: SUM=$SUM"
 		done < $OUTPUT_DIR/okay-$sample
-		echo "SUCCESS: $SUM moyenne=$(($SUM/10))
+		echo "SUCCESS: $SUM moyenne=$(($SUM/10))"
 		SUM=0
 		while read taux
 		do
 			SUM=$(($SUM+$taux))
 		done < $OUTPUT_DIR/fail-$sample
-		echo "FAIL: $SUM moyenne=$(($SUM/10))
+		echo "FAIL: $SUM moyenne=$(($SUM/10))"
 		#result $? "hwrng-rngtest2-$HWRNG_NAME"
 	else
 		echo "ERROR: rngtest not present"
@@ -138,6 +140,7 @@ print_crypto_stat
 
 test_rk3288_crypto_rng()
 {
+	echo "DEBUG: test rk3288 RNG"
 	if [ ! -e /sys/kernel/debug/rk3288_crypto/sample ];then
 		return
 	fi
