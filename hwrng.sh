@@ -107,25 +107,31 @@ test_hwrng()
 			grep 'rngtest: FIPS 140-2 successes:' $OUTPUT_DIR/rng.out | sed 's,.*[[:space:]],,' >> $OUTPUT_DIR/okay-$sample
 			grep 'rngtest: FIPS 140-2 failures:' $OUTPUT_DIR/rng.out | sed 's,.*[[:space:]],,' >> $OUTPUT_DIR/fail-$sample
 		done
-		echo "================= okay"
+		echo "================= okay for sample=$sample"
 		cat $OUTPUT_DIR/okay-$sample
-		echo "================= fail"
+		echo "================= fail for sample=$sample"
 		cat $OUTPUT_DIR/fail-$sample
 		SUM=0
 		while read taux
 		do
-			echo "DEBUG: read $taux"
+			#echo "DEBUG: read $taux"
 			SUM=$(($SUM+$taux))
-			echo "DEBUG: SUM=$SUM"
+			#echo "DEBUG: SUM=$SUM"
 		done < $OUTPUT_DIR/okay-$sample
+		SUCMOY=$(($SUM/10))
 		echo "SUCCESS: $SUM moyenne=$(($SUM/10))"
+		lava-test-case "hwrng-okay-$sample" --result pass --measurement $SUCMOY --units "none"
 		SUM=0
 		while read taux
 		do
 			SUM=$(($SUM+$taux))
 		done < $OUTPUT_DIR/fail-$sample
+		FAILMOY=$(($SUM/10))
 		echo "FAIL: $SUM moyenne=$(($SUM/10))"
+		lava-test-case "hwrng-fail-$sample" --result pass --measurement $FAILMOY --units "none"
 		#result $? "hwrng-rngtest2-$HWRNG_NAME"
+		TOTAL=$(($SUCMOY+$FAILMOY))
+		echo "FINAL SUCCESS RATE $((100*$SUCMOY/$TOTAL)) for sample=$sample"
 	else
 		echo "ERROR: rngtest not present"
 		return 1
@@ -145,14 +151,16 @@ test_rk3288_crypto_rng()
 		return
 	fi
 
-	for sample in 10 50 100 200 400 500 700 1000 2000
+	for sample in 100 200 400 500 600 700 800 1000 1200 1500 1700 2000 4000
 	do
 		echo "================================================="
 		echo "SAMPLE $sample"
 		echo "================================================="
+		start_test "CHeck hwrng with sample=$sample"
 		echo $sample > /sys/kernel/debug/rk3288_crypto/sample
 		cat /sys/kernel/debug/rk3288_crypto/sample
 		test_hwrng
+		result $? "hwrng-sample-$sample"
 	done
 	print_crypto_stat
 }
