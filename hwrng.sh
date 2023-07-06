@@ -86,7 +86,7 @@ test_hwrng()
 	if [ "$HWRNG_NAME" = 'none' ];then
 		return 1
 	fi
-	#start_test "Check hwrng $HWRNG_NAME"
+	start_test "Check hwrng $HWRNG_NAME with rngtest"
 	#dd if=/dev/hwrng count=1 bs=512 2>/dev/null >/dev/null
 	#RET=$?
 	#result $RET "hwrng-simple-$HWRNG_NAME"
@@ -131,9 +131,13 @@ test_hwrng()
 		lava-test-case "hwrng-fail-$sample" --result pass --measurement $FAILMOY --units "none"
 		#result $? "hwrng-rngtest2-$HWRNG_NAME"
 		TOTAL=$(($SUCMOY+$FAILMOY))
-		echo "FINAL SUCCESS RATE $((100*$SUCMOY/$TOTAL)) for sample=$sample"
+		if [ $TOTAL -ge 1 ];then
+			echo "FINAL SUCCESS RATE $((100*$SUCMOY/$TOTAL)) for sample=$sample"
+		fi
+		result 0 "hwrng-rngtest"
 	else
 		echo "ERROR: rngtest not present"
+		result SKIP "hwrng-rngtest"
 		return 1
 	fi
 	return 0
@@ -166,3 +170,12 @@ test_rk3288_crypto_rng()
 }
 
 test_rk3288_crypto_rng
+
+#f [ -x /bin/dieharder ];then
+	which dieharder
+	echo "DEBUG: test with dieharder"
+	start_test "Check hwrng with dieharder"
+	dd if=/dev/hwrng count=20000 bs=2048 > $OUTPUT_DIR/rng.out
+	dieharder -a -g 201 -f $OUTPUT_DIR/rng.out
+	result $? "hwrng-dieharder"
+#fi
