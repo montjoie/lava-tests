@@ -7,6 +7,11 @@ run:
     steps:
       - chmod +x ./start.sh
       - ./start.sh
+      - echo "infra tests"
+      - lava-test-set start test-infra
+      - chmod +x ./infra.sh
+      - ./infra.sh
+      - lava-test-set stop test-infra
       - echo "Wifi tests"
       - lava-test-set start test-wifi
       - chmod +x ./wifi.sh

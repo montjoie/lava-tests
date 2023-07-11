@@ -42,3 +42,9 @@ result $? "external-network"
 start_test "Test DNS"
 ping -c 4 dns.google.com
 result $? "dns"
+
+TEST_PREFIX="infra"
+
+start_test "Run sensors"
+sensors
+result $? "sensors"
