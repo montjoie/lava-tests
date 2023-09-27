@@ -86,6 +86,18 @@ fi
 
 echo "TEST with FTDI=$FTDI PL2303=$PL2303 and CH348 port0=$CH348_0 port1=$CH348_1"
 
+echo "======================================================================="
+echo "======================================================================="
+if [ -x /usr/bin/cpserialtest ];then
+
+/usr/bin/cpserialtest $FTDI 9600&
+/usr/bin/cpserialtest $CH348_0 9600
+else
+	find /|grep serialtest
+fi
+echo "======================================================================="
+echo "======================================================================="
+
 setserial -h
 echo "DEBUG: getserial"
 setserial -g $FTDI
