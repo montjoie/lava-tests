@@ -279,6 +279,9 @@ print_crypto_stat()
 			;;
 			esac
 		fi
+		if [ -e /sys/kernel/debug/$dirstat/info ];then
+			cat /sys/kernel/debug/$dirstat/info
+		fi
 	done
 	find /sys/kernel/debug/ |grep -i caam
 	if [ -e /sys/kernel/debug/dma-api/dump ];then
