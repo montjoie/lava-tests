@@ -7,6 +7,8 @@ FTDI_2=""
 CH348_0=""
 CH348_1=""
 CH348_2=""
+CH348_6=""
+CH348_7=""
 PL2303=""
 
 echo "DEBUG: doing lsusb"
@@ -15,7 +17,7 @@ lsusb
 echo "DUMP USB serial"
 ls -l /dev |grep USB
 
-find /dev -iname 'tty*USB[0-9]' > /tmp/allserial
+find /dev -iname 'tty*USB[0-9]*' > /tmp/allserial
 while read serial
 do
 	echo "======================================================"
@@ -60,6 +62,16 @@ do
 			CH348_2="$serial"
 			echo "INFO: Found CH348 PORT 2 $serial"
 		fi
+		grep -q port6 /tmp/udevadm
+		if [ $? -eq 0 ];then
+			CH348_6="$serial"
+			echo "INFO: Found CH348 PORT 6 $serial"
+		fi
+		grep -q port7 /tmp/udevadm
+		if [ $? -eq 0 ];then
+			CH348_7="$serial"
+			echo "INFO: Found CH348 PORT 7 $serial"
+		fi
 		if [ "$serial" = '/dev/ttyCH9344USB0' ];then
 			CH348_0="$serial"
 		fi
@@ -75,6 +87,15 @@ do
 	esac
 done < /tmp/allserial
 
+chmod 755 ./test2a2.py
+if [ -e /dev/ttyCH9344USB7 ];then
+	echo "VENDOR DRIVER"
+	ls -l /dev/ttyCH9344USB6
+	ls -l /dev/ttyCH9344USB7
+	./test2a2.py --port0 /dev/ttyCH9344USB6 --port1 /dev/ttyCH9344USB7
+	exit 0
+fi
+
 if [ -z "$FTDI" ];then
 	echo "ERROR: MISSING FTDI"
 	exit 0
@@ -84,17 +105,29 @@ if [ -z "$CH348_0" ];then
 	exit 0
 fi
 
+./test2a2.py --port0 $CH348_6 --port1 $CH348_7
+
+dmesg
+
+echo "======================================================================="
+echo "======================================================================="
+./test2a2.py --port0 $FTDI --port1 $CH348_0
+echo "======================================================================="
+echo "======================================================================="
+./test2a2.py --port1 $FTDI --port0 $CH348_0
+echo "======================================================================="
+echo "======================================================================="
+exit 0
 echo "TEST with FTDI=$FTDI PL2303=$PL2303 and CH348 port0=$CH348_0 port1=$CH348_1"
 
-echo "======================================================================="
-echo "======================================================================="
-if [ -x /usr/bin/cpserialtest ];then
-
-/usr/bin/cpserialtest $FTDI 9600&
-/usr/bin/cpserialtest $CH348_0 9600
-else
-	find /|grep serialtest
-fi
+#echo "======================================================================="
+#echo "======================================================================="
+#if [ -x /usr/bin/cpserialtest ];then
+#/usr/bin/cpserialtest $FTDI 9600&
+#/usr/bin/cpserialtest $CH348_0 9600
+#else
+#	find /|grep serialtest
+#fi
 echo "======================================================================="
 echo "======================================================================="
 
@@ -149,7 +182,6 @@ setserial -g $CH348_0
 
 #sleep 10
 
-chmod 755 ./test2a2.py
 for i in $(seq 1 100);
 do
 	echo "DEBUG: modprobe/rmmod loop $i"
