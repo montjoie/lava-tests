@@ -168,6 +168,9 @@ test_interface() {
 		start_test "Set MTU to $mtu"
 		ip link set $netdev mtu $mtu
 		result $? "network-$netdev-mtu-$mtu"
+		# TODO check with ip if MTU is really set
+		MTUSET=$(ip link show $netdev |grep -o 'mtu[[:space:]]*[0-9]*' | cut -d' ' -f2)
+		echo "DEBUG: MTUSET=$MTUSET"
 
 		start_test "up $netdev for changing MTU"
 		ip link set $netdev up
@@ -180,10 +183,11 @@ test_interface() {
 			udhcpc -i $netdev -q -f -n
 			sleep 5
 			ip a |grep -q 192.168
-			if [ $? -ne 0 ];then
-				ip a add 192.168.1.204 dev $netdev
-				ip route add default gw 192.168.1.1
-			fi
+			result $? "network-$netdev-mtu-$mtu-ip"
+			#if [ $? -ne 0 ];then
+			#	ip a add 192.168.1.204 dev $netdev
+			#	ip route add default gw 192.168.1.1
+			#fi
 			ip a
 		fi
 		echo "========================"
