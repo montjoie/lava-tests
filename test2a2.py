@@ -10,6 +10,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--port0",type=str, help="tty name of CH348 port #1 to test")
 parser.add_argument("--port1",type=str, help="tty name of CH348 port #2 to test")
 parser.add_argument("--lava", help="Send LAVA signal", action="store_true")
+parser.add_argument("--zero", help="Only zeroes and show change", action="store_true")
 
 args = parser.parse_args()
 
@@ -27,8 +28,13 @@ def test(s0, s1):
         for size in [32, 64, 96, 192, 256, 1024, 2048]:
             readbuf = ''
             flen = 0
-            pattern = string.ascii_lowercase
+            pattern = string.printable
             rstr = ''.join(random.choice(pattern) for i in range(size))
+            if args.zero:
+                rstr = ""
+                for i in range(size):
+                    rstr += "0"
+                print(f"DEBUG! len={len(rstr)}")
             t0.write(rstr.encode('UTF8'))
             t1.write(b"PLOP\n")
 
@@ -63,9 +69,12 @@ def test(s0, s1):
             if readbuf != rstr:
                 i = 0
                 ndiff = 0
+                first = True
                 while i < size:
                     if readbuf[i] != rstr[i]:
-                        #print(f"different at {i} {readbuf[i]} {rstr[i]}")
+                        if args.zero or first:
+                            print(f"different at {i} {readbuf[i]} {rstr[i]}")
+                            first = False
                         ndiff += 1
                     i += 1
                 print("================================================================")
