@@ -40,8 +40,13 @@ do
 			FTDI="$serial"
 			echo "INFO: Found FTDI $serial for port 0"
 		;;
+		FTBXX2VF)
+			#PORT0
+			FTDI="$serial"
+			echo "INFO: Found FTDI $serial for port 0"
+		;;
 		*)
-			echo "ERROR: unknow ID"
+			echo "ERROR: unknow ID $SERIALID"
 		;;
 		esac
 	;;
@@ -107,22 +112,22 @@ fi
 
 echo "======================================================================="
 echo "======================================================================= ZERO MODE"
-./test2a2.py --port0 $CH348_6 --port1 $CH348_7 --zero
+./test2a2.py --port0 $CH348_6 --port1 $CH348_7 --zero || exit $?
 echo "======================================================================= ch348 port 6 to 7"
 echo "======================================================================="
-./test2a2.py --port0 $CH348_6 --port1 $CH348_7
+./test2a2.py --port0 $CH348_6 --port1 $CH348_7 || exit $?
 
 dmesg
 
 echo "======================================================================= pl2303 to port 1"
 echo "======================================================================="
-./test2a2.py --port1 $PL2303 --port0 $CH348_1
+./test2a2.py --port1 $PL2303 --port0 $CH348_1 || exit $?
 echo "======================================================================="
 echo "======================================================================= ftdi to port 0"
-./test2a2.py --port0 $FTDI --port1 $CH348_0
+./test2a2.py --port0 $FTDI --port1 $CH348_0 || exit $?
 echo "======================================================================="
 echo "======================================================================= ftdi to port 0"
-./test2a2.py --port1 $FTDI --port0 $CH348_0
+./test2a2.py --port1 $FTDI --port0 $CH348_0 || exit $?
 
 echo "TEST with FTDI=$FTDI PL2303=$PL2303 and CH348 port0=$CH348_0 port1=$CH348_1"
 exit 0

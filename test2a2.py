@@ -17,6 +17,7 @@ args = parser.parse_args()
 BAUDS = [1200, 1800, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400, 1500000, 921600]
 BAUDS = [9600, 19200, 38400, 57600, 115200, 230400, 1500000, 921600]
 
+ret = 0
 print('serial test v0')
 
 def test(s0, s1):
@@ -66,6 +67,7 @@ def test(s0, s1):
                 print("ERROR: sizes are different")
                 if args.lava:
                     print("<LAVA_SIGNAL_TESTCASE TEST_CASE_ID=ch348-2a2-%d-%d RESULT=fail>" % (baud, size))
+                sys.exit(1)
                 continue
             if readbuf != rstr:
                 i = 0
@@ -82,9 +84,10 @@ def test(s0, s1):
                 print(f"ERROR: strings are different (ndiff={ndiff})")
                 if args.lava:
                     print("<LAVA_SIGNAL_TESTCASE TEST_CASE_ID=ch348-2a2-%d-%d RESULT=fail>" % (baud, size))
+                sys.exit(1)
                 continue
             if args.lava:
                 print("<LAVA_SIGNAL_TESTCASE TEST_CASE_ID=ch348-2a2-%d-%d RESULT=pass>" % (baud, size))
 
 test(args.port0, args.port1)
-
+sys.exit(ret)
