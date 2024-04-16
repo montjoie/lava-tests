@@ -15,6 +15,7 @@ parser.add_argument("--port0",type=str, help="tty name of CH348 port #1 to test"
 parser.add_argument("--port1",type=str, help="tty name of CH348 port #2 to test")
 parser.add_argument("--lava", help="Send LAVA signal", action="store_true")
 parser.add_argument("--zero", help="Only zeroes and show change", action="store_true")
+parser.add_argument("--slow", help="Slow mode", action="store_true")
 parser.add_argument("--parallel", help="Test all ports in parallel")
 
 args = parser.parse_args()
@@ -92,6 +93,44 @@ BAUDS = [9600, 19200, 38400, 57600, 115200, 230400, 1500000, 921600]
 ret = 0
 print(f'serial test v0 for {args.port0} {args.port1}')
 
+# send string s (len l) from t0 to t1
+def send_recv(t0, t1, s, l):
+    print(f"DEBUG: send_recv {l}")
+    sent = 0
+    recved = 0
+    rbuf = ''
+    done = False
+    timeout = 0
+    while not done:
+        if sent < l:
+            sizetosend = random.randint(1, l - sent)
+            tosend = s[sent:sent + sizetosend]
+            t0.write(tosend.encode('UTF8'))
+            sent += sizetosend
+            print(f"DEBUG: sent {sizetosend}/{l} sent={sent} remains={l-sent}")
+        time.sleep(random.randint(250, 750) / 1000)
+        if recved < l:
+            x1 = t1.read(random.randint(1, 256))
+            try:
+                d = x1.decode("UTF8")
+            except UnicodeDecodeError:
+                print("ERROR: UNICODE ERROR")
+                return 1
+            rsize = len(d)
+            print(f"DEBUG: RECV {rsize}")
+            rbuf += d
+            recved += rsize
+        if recved == l:
+            done = True
+        timeout += 1
+        if timeout > 1000:
+            done = True
+    if rbuf == s:
+        print(f"DEBUG: string are equal")
+    else:
+        print(f"DEBUG: string are different")
+
+
 def test(s0, s1):
     print(f'DEBUG: serial test {s0} {s1}')
     DOCTS=0
@@ -105,6 +144,9 @@ def test(s0, s1):
             flen = 0
             pattern = string.printable
             rstr = ''.join(random.choice(pattern) for i in range(size))
+            if args.slow:
+                send_recv(t0, t1, rstr, size)
+                continue
             if args.zero:
                 rstr = ""
                 for i in range(size):
