@@ -123,7 +123,9 @@ def send_recv(t0, t1, s, l):
         if recved == l:
             done = True
         timeout += 1
-        if timeout > 1000:
+        if timeout > 10 and recved == 0:
+            done = True
+        if timeout > 100:
             done = True
     if rbuf == s:
         print(f"DEBUG: string are equal")
