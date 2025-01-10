@@ -129,8 +129,10 @@ def send_recv(t0, t1, s, l):
             done = True
     if rbuf == s:
         print(f"DEBUG: string are equal")
+        return 0
     else:
         print(f"DEBUG: string are different")
+        return 1
 
 
 def test(s0, s1):
@@ -147,7 +149,11 @@ def test(s0, s1):
             pattern = string.printable
             rstr = ''.join(random.choice(pattern) for i in range(size))
             if args.slow:
-                send_recv(t0, t1, rstr, size)
+                ret = send_recv(t0, t1, rstr, size)
+                if ret != 0:
+                    if args.lava:
+                        print("<LAVA_SIGNAL_TESTCASE TEST_CASE_ID=ch348-2a2-%d-%d RESULT=fail>" % (baud, size))
+                    return 1
                 continue
             if args.zero:
                 rstr = ""
@@ -208,5 +214,5 @@ def test(s0, s1):
             if args.lava:
                 print("<LAVA_SIGNAL_TESTCASE TEST_CASE_ID=ch348-2a2-%d-%d RESULT=pass>" % (baud, size))
 
-test(args.port0, args.port1)
+ret = test(args.port0, args.port1)
 sys.exit(ret)
