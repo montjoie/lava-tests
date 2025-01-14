@@ -13,7 +13,7 @@ import time
 parser = argparse.ArgumentParser()
 parser.add_argument("--port0",type=str, help="tty name of CH348 port #1 to test")
 parser.add_argument("--port1",type=str, help="tty name of CH348 port #2 to test")
-parser.add_argument("--lava", help="Send LAVA signal", action="store_true")
+parser.add_argument("--lava", help="Send LAVA signal", type=str, default=None)
 parser.add_argument("--zero", help="Only zeroes and show change", action="store_true")
 parser.add_argument("--slow", help="Slow mode", action="store_true")
 parser.add_argument("--parallel", help="Test all ports in parallel")
@@ -114,7 +114,7 @@ def send_recv(t0, t1, s, l):
             try:
                 d = x1.decode("UTF8")
             except UnicodeDecodeError:
-                print("ERROR: UNICODE ERROR")
+                print(f"ERROR: UNICODE ERROR recv={len(x1)}")
                 return 1
             rsize = len(d)
             print(f"DEBUG: RECV {rsize}")
@@ -151,9 +151,15 @@ def test(s0, s1):
             if args.slow:
                 ret = send_recv(t0, t1, rstr, size)
                 if ret != 0:
-                    if args.lava:
-                        print("<LAVA_SIGNAL_TESTCASE TEST_CASE_ID=ch348-2a2-%d-%d RESULT=fail>" % (baud, size))
+                    if args.lava is not None:
+                        print("<LAVA_SIGNAL_TESTCASE TEST_CASE_ID=ch348-slow-%s-%d-%d RESULT=fail>" % (args.lava, baud, size))
+                    else:
+                        print("DEBUG: no LAVA signal")
                     return 1
+                if args.lava is not None:
+                    print("<LAVA_SIGNAL_TESTCASE TEST_CASE_ID=ch348-slow-%s-%d-%d RESULT=pass>" % (args.lava, baud, size))
+                else:
+                    print("DEBUG: no LAVA signal")
                 continue
             if args.zero:
                 rstr = ""
@@ -172,7 +178,7 @@ def test(s0, s1):
                     d = x1.decode("UTF8")
                     rsize = len(d)
                 except UnicodeDecodeError:
-                    print("ERROR: UNICODE ERROR")
+                    print(f"ERROR: UNICODE ERROR recv={len(x1)}")
                     d = x1.decode("UTF8", errors="ignore")
                     rsize = len(d)
                     print("STRING USED:")
@@ -191,7 +197,7 @@ def test(s0, s1):
             if flen != size:
                 print("ERROR: sizes are different")
                 if args.lava:
-                    print("<LAVA_SIGNAL_TESTCASE TEST_CASE_ID=ch348-2a2-%d-%d RESULT=fail>" % (baud, size))
+                    print("<LAVA_SIGNAL_TESTCASE TEST_CASE_ID=ch348-2a2-%s-%d-%d RESULT=fail>" % (args.lava, baud, size))
                 sys.exit(1)
                 continue
             if readbuf != rstr:
@@ -208,11 +214,11 @@ def test(s0, s1):
                 print("================================================================")
                 print(f"ERROR: strings are different (ndiff={ndiff})")
                 if args.lava:
-                    print("<LAVA_SIGNAL_TESTCASE TEST_CASE_ID=ch348-2a2-%d-%d RESULT=fail>" % (baud, size))
+                    print("<LAVA_SIGNAL_TESTCASE TEST_CASE_ID=ch348-2a2-%s-%d-%d RESULT=fail>" % (args.lava, baud, size))
                 sys.exit(1)
                 continue
             if args.lava:
-                print("<LAVA_SIGNAL_TESTCASE TEST_CASE_ID=ch348-2a2-%d-%d RESULT=pass>" % (baud, size))
+                print("<LAVA_SIGNAL_TESTCASE TEST_CASE_ID=ch348-2a2-%s-%d-%d RESULT=pass>" % (args.lava, baud, size))
 
 ret = test(args.port0, args.port1)
 sys.exit(ret)

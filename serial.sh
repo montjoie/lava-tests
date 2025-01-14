@@ -10,6 +10,8 @@ CH348_2=""
 CH348_6=""
 CH348_7=""
 PL2303=""
+FTDIS0=""
+FTDIS1=""
 
 echo "DEBUG: doing lsusb"
 lsusb
@@ -44,6 +46,18 @@ do
 			#PORT0
 			FTDI="$serial"
 			echo "INFO: Found FTDI $serial for port 0"
+		;;
+		FT9UASWO)
+			echo "INFO: Found FTDI1 $serial for FTDI2FTDI test"
+			FTDIS1="$serial"
+		;;
+		FTBHM3LP)
+			echo "INFO: Found FTDI0 $serial for FTDI2FTDI test"
+			FTDIS0="$serial"
+		;;
+		FTA09XVS)
+			echo "INFO: Found FTDI2 $serial for FTDI2FTDI test"
+			FTDIS2="$serial"
 		;;
 		*)
 			echo "ERROR: unknow ID $SERIALID"
@@ -89,6 +103,10 @@ do
 		echo "INFO: Found PL2303 0 $serial"
 		#udevadm info $serial
 	;;
+	10c4)
+		echo "INFO: Found extra cp210 for FTDI2FTDI"
+		CP210="$serial"
+	;;
 	esac
 done < /tmp/allserial
 
@@ -100,6 +118,17 @@ if [ -e /dev/ttyCH9344USB7 ];then
 	./test2a2.py --port0 /dev/ttyCH9344USB6 --port1 /dev/ttyCH9344USB7
 	exit 0
 fi
+if [ ! -z "$FTDIS0" ];then
+	./test2a2.py --port0 $FTDIS2 --port1 $CH348_0 --slow --lava ftdi2_ch348_0
+	./test2a2.py --port0 $CH348_0 --port1 $FTDIS2 --slow --lava ch348_0_ftdi2
+	#./test2a2.py --port0 $FTDIS2 --port1 $CP210 --slow --lava ftdi_cp210
+	#./test2a2.py --port0 $CP210 --port1 $FTDIS2 --slow --lava cp210_ftdi
+
+	./test2a2.py --port0 $FTDIS0 --port1 $FTDIS1 --slow --lava ftdi0_ftdi1
+	./test2a2.py --port0 $FTDIS1 --port1 $FTDIS0 --slow --lava ftdi1_ftdi0
+
+	exit $?
+fi
 
 if [ -z "$FTDI" ];then
 	echo "ERROR: MISSING FTDI"
@@ -110,46 +139,50 @@ if [ -z "$CH348_0" ];then
 	exit 0
 fi
 
-./test2a2.py --port0 $CH348_6 --port1 $CH348_7 --slow || exit $?
+echo "======================================================================="
+echo "======================================================================= CH348_6 ($CH348_6) to CH348_7 ($CH348_7)"
+./test2a2.py --port0 $CH348_6 --port1 $CH348_7 --slow --lava slow_ch348_6_ch348_7 || exit $?
 echo "======================================================================="
 echo "======================================================================= FTDI ($FTDI) to CH348_0 ($CH348_0)"
+./test2a2.py --port0 $FTDI --port1 $CH348_0 --slow --lava slow_ftdi_ch348_0
+./test2a2.py --port0 $CH348_0 --port1 $FTDI --slow --lava slow_ch3480_ftdi
 ./test2a2.py --port0 $FTDI --port1 $CH348_0 --slow
-if [ $? -ne 0 ];then
-	dmesg
-	exit 1
-fi
+#if [ $? -ne 0 ];then
+#	dmesg
+#	exit 1
+#fi
 echo "======================================================================="
 echo "======================================================================= FTDI2 ($FTDI_2) to CH348_2 ($CH348_2)"
-./test2a2.py --port0 $FTDI_2 --port1 $CH348_2 --slow || exit $?
+./test2a2.py --port0 $FTDI_2 --port1 $CH348_2 --slow --lava slow_ftdi_ch348_2
 echo "======================================================================="
 echo "======================================================================= PL2303 ($PL2303) to CH348_1 ($CH348_1)"
-./test2a2.py --port0 $PL2303 --port1 $CH348_1 --slow || exit $?
+./test2a2.py --port0 $PL2303 --port1 $CH348_1 --slow --lava slow_pl2303_ch348_1
 
 echo "======================================================================="
 echo "======================================================================= parallel"
-./test2a2.py --parallel $FTDI:$CH348_0,$PL2303:$CH348_1,$FTDI_2:$CH348_2,$CH348_6:$CH348_7 || exit $?
+./test2a2.py --parallel $FTDI:$CH348_0,$PL2303:$CH348_1,$FTDI_2:$CH348_2,$CH348_6:$CH348_7 --lava parallel || exit $?
 
 echo "======================================================================="
 echo "======================================================================= ZERO MODE"
-./test2a2.py --port0 $CH348_6 --port1 $CH348_7 --zero || exit $?
+./test2a2.py --port0 $CH348_6 --port1 $CH348_7 --zero --lava zero || exit $?
 echo "======================================================================= ch348 port 6 to 7"
 echo "======================================================================="
-./test2a2.py --port0 $CH348_6 --port1 $CH348_7 || exit $?
+./test2a2.py --port0 $CH348_6 --port1 $CH348_7 --lava test2a2_ch348_6_ch348_7 || exit $?
 
 dmesg
 
 echo "======================================================================= pl2303 to port 1"
 echo "======================================================================="
-./test2a2.py --port1 $PL2303 --port0 $CH348_1 || exit $?
+./test2a2.py --port1 $PL2303 --port0 $CH348_1 --lava test2a2_pl2303_ch348_1 || exit $?
 echo "======================================================================="
 echo "======================================================================= ftdi2 to port 0"
-./test2a2.py --port0 $FTDI_2 --port1 $CH348_2 || exit $?
+./test2a2.py --port0 $FTDI_2 --port1 $CH348_2 --lava test2a2_ftdi2_ch348_2 || exit $?
 echo "======================================================================="
 echo "======================================================================= ftdi to port 0"
-./test2a2.py --port0 $FTDI --port1 $CH348_0 || exit $?
+./test2a2.py --port0 $FTDI --port1 $CH348_0 --lava test2a2_ftdi_ch348_0 || exit $?
 echo "======================================================================="
 echo "======================================================================= ftdi to port 0"
-./test2a2.py --port1 $FTDI --port0 $CH348_0 || exit $?
+./test2a2.py --port1 $FTDI --port0 $CH348_0 --lava test2a2_ch348_0_ftdi || exit $?
 
 echo "TEST with FTDI=$FTDI PL2303=$PL2303 and CH348 port0=$CH348_0 port1=$CH348_1"
 
