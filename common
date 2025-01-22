@@ -409,6 +409,7 @@ mini_network_test() {
 	if [ -e /etc/resolv.conf ];then
 		echo "resolv.conf exists"
 		ls -l /etc/resolv.conf
+		cat /etc/resolv.conf
 	else
 		echo "No resolv.conf"
 		# TODO solution of doing a link like said in https://www.kernel.org/doc/Documentation/filesystems/nfs/nfsroot.txt
