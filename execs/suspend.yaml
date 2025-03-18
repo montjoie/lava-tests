@@ -1,0 +1,12 @@
+metadata:
+  name: Montjoie tests
+  format: "Lava-Test-Shell Test Definition 1.0"
+  description: "Montjoie test"
+  version: 1.0
+run:
+    steps:
+      - echo "Suspend tests"
+      - lava-test-set start suspend
+      - chmod +x ./suspend.sh
+      - ./suspend.sh
+      - lava-test-set stop
