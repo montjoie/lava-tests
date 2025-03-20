@@ -399,6 +399,18 @@ do
 		;;
 		esac
 	;;
+	rk3588)
+		FLASH_METHOD="rockchip"
+		case $cblock in
+		fe2e0000.mmc)
+			echo "Controller is SD"
+			set_boot_dev sd /dev/$block
+		;;
+		*)
+			echo "Unknown controller $cblock"
+		;;
+		esac
+	;;
 	*)
 		echo "ERROR: unknow SOC $SOC for SD"
 		exit 1
@@ -523,7 +535,7 @@ sunxi)
 	fi
 	sync
 ;;
-rk3328)
+rockchip)
 	# Need additional idbloater
 	echo "DEBUG: download ${MACHINE_MODEL_}-idbloader.img"
 	wget $UBOOT_BIN_URL/${MACHINE_MODEL_}-idbloader.img
@@ -531,11 +543,11 @@ rk3328)
 		echo "ERROR: fail to download"
 		exit 1
 	fi
-	dd if=${MACHINE_MODEL_}-idbloader.img of=$BOOT_DEV seek=64
+	dd if=${MACHINE_MODEL_}-idbloader.img of=$BOOT_DEV bs=512 seek=64
 	if [ $? -ne 0 ];then
-		echo "ERROR: uboot flash"
+		echo "ERROR: uboot flash idbloader"
 	fi
-	dd if=uboot-$MACHINE_MODEL_ of=$BOOT_DEV seek=16384
+	dd if=uboot-$MACHINE_MODEL_ of=$BOOT_DEV bs=512 seek=16384
 	if [ $? -ne 0 ];then
 		echo "ERROR: uboot flash"
 	fi

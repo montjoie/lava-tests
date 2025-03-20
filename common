@@ -163,6 +163,10 @@ get_machine_model() {
 	if [ $? -eq 0 ];then
 		SOC=rk3328
 	fi
+	grep -qE 'rk3588' /sys/firmware/devicetree/base/compatible
+	if [ $? -eq 0 ];then
+		SOC=rk3588
+	fi
 	grep -qE 'sun50i-h5' /sys/firmware/devicetree/base/compatible
 	if [ $? -eq 0 ];then
 		SOC=H5
