@@ -498,7 +498,7 @@ do_iperf() {
 			echo "DEBUG: will report measurements to $BW_REPORT"
 			shift
 		fi
-		IPERF_ARGS="$* --json"
+		IPERF_ARGS="$* --json --rcv-timeout 10000 --snd-timeout 10000"
 		echo "DEBUG: will do iperf on $IPERF_HOST with $IPERF_ARGS"
 	;;
 	esac
