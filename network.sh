@@ -9,6 +9,14 @@ TEST_PREFIX="test-network"
 NBD_ROOT=0
 NFS_ROOT=0
 
+start_test "Verify there is at least one network adapter"
+NETWORKS=$(ls /sys/class/net/ |grep -vE 'lo|sit0')
+if [ -z "$NETWORKS" ];then
+	result SKIP "network-tests"
+	exit 0
+fi
+result 0 "network-tests"
+
 start_test "Detect the use of a NBD root"
 grep -i "nbd" /proc/mounts
 RET=$?
@@ -53,8 +61,12 @@ result $? "network-ip-route"
 
 start_test "Test gateway"
 GATEWAY_IP=$(ip route |grep ^default | cut -d' ' -f3)
-ping -c4 "$GATEWAY_IP"
-result $? "network-ping-gateway"
+if [ -z "$GATEWAY_IP" ];then
+	result SKIP "network-ping-gateway"
+else
+	ping -c4 "$GATEWAY_IP"
+	result $? "network-ping-gateway"
+fi
 
 grep nameserver /proc/net/pnp | cut -d' ' -f2 > "$OUTPUT_DIR/nameservers"
 while read -r nameserver
