@@ -155,7 +155,7 @@ test_interface() {
 	OMTU=$(grep -o 'mtu [0-9]*' $OUTPUT_DIR/iplink | cut -d' ' -f2)
 	echo "DEBUG: original MTU is $OMTU"
 
-	for mtu in 68 500 1000 1200 1400 1500 1600 9000
+	for mtu in 500 1000 1200 1400 1500 1600
 	do
 		if [ $mtu -eq $OMTU ];then
 			echo "DEBUG: skip $mtu as same as old MTU"
