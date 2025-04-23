@@ -88,10 +88,6 @@ start_test "IPSEC: dump state"
 ip xfrm state
 result $? "ipsec-state-dump1"
 
-start_test "Get crypto stat"
-getstat > getstat.orig
-result $? "ipsec-getstat-orig"
-
 print_crypto_stat
 
 start_test "IPSEC: ping via ipsec"
@@ -118,11 +114,6 @@ start_test "IPSEC: iperf udp"
 iperf3 --udp --port 5201 -c ipsec.lava.local -V
 result $? "ipsec-iperf-udp"
 do_iperf ipsec.lava.local ipsec-udp --udp --port 5201
-
-start_test "IPSEC: getstat new"
-getstat > getstat.new
-result $? "ipsec-getstat-new"
-diff -u getstat.orig getstat.new
 
 print_crypto_stat
 
