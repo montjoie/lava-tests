@@ -346,6 +346,10 @@ do
 		echo "SKIP: dont check $iface"
 		continue
 	fi
+	if [ "$iface" = 'sit0' ];then
+		echo "SKIP: dont check $iface"
+		continue
+	fi
 	test_interface "$iface"
 done
 
