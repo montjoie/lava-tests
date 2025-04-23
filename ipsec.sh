@@ -42,9 +42,21 @@ date
 
 start_test "IPSEC: download cacert"
 wget -q http://ipsec.lava.local/cacert.crt
-result $? "ipsec-download-cacert"
+RET=$?
+result $RET "ipsec-download-cacert"
+if [ $RET -ne 0 ];then
+	echo "ABORTING TESTS"
+	exit 0
+fi
 
+start_test "IPSEC: download lava.crt"
 wget -q http://ipsec.lava.local/lava.crt
+RET=$?
+result $RET "ipsec-download-lava"
+if [ $RET -ne 0 ];then
+	exit 0
+fi
+
 wget -q http://ipsec.lava.local/dut.crt
 wget -q http://ipsec.lava.local/dut.key
 wget -q http://ipsec.lava.local/ipsec.conf
@@ -53,12 +65,12 @@ start_test "IPSEC: download ipsec.secrets"
 wget -q http://ipsec.lava.local/ipsec.secrets
 result $? "ipsec-download-secrets"
 
-mv dut.key /etc/ipsec.d/private/
-mv dut.crt /etc/ipsec.d/certs/
-mv lava.crt /etc/ipsec.d/certs/
-mv cacert.crt /etc/ipsec.d/cacerts/
-mv ipsec.conf /etc/
-mv ipsec.secrets /etc/
+mv dut.key /etc/ipsec.d/private/ || exit $?
+mv dut.crt /etc/ipsec.d/certs/ || exit $?
+mv lava.crt /etc/ipsec.d/certs/ || exit $?
+mv cacert.crt /etc/ipsec.d/cacerts/ || exit $?
+mv ipsec.conf /etc/ || exit $?
+mv ipsec.secrets /etc/ || exit $?
 
 start_test "IPSEC: start"
 ipsec start
