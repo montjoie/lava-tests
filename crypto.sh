@@ -146,7 +146,7 @@ test_hwrng
 # check for some result
 # tcrypt generate error -2 for non-present algs
 start_test "Verify crypto errors"
-dmesg | grep -vE 'is unavailable$|[[:space:]]-2$|This is intended for developer use only|alg: No test for stdrng' |grep alg:
+dmesg | grep -vE 'is unavailable$|[[:space:]]-2$|This is intended for developer use only|alg: No test for stdrng|alg: No test for ffdhe' |grep alg:
 RET=$?
 if [ $RET -eq 0 ];then
 	result 1 "crypto-error-log"
