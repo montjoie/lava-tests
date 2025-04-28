@@ -60,3 +60,19 @@ fi
 start_test "Run sensors"
 sensors
 result $? "sensors"
+
+#start_test "dmesg logs"
+for level in warn err; do
+	dmesg --level=$level --notime -x -k > dmesg.$level
+done
+for level in crit alert emerg; do
+	dmesg --level=$level --notime -x -k > dmesg.$level
+	test -s dmesg.$level && res=fail || res=pass
+	count=$(cat dmesg.$level | wc -l)
+	lava-test-case $level \
+		--result $res \
+		--measurement $count \
+		--units lines
+done
+
+cat dmesg.emerg dmesg.alert dmesg.crit dmesg.err dmesg.warn
