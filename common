@@ -88,13 +88,13 @@ result() {
 		lava-test-case $* --result skip
 		return
 	fi
+	if [ "$result" == 'PASS' -o "$result" == 'pass' ];then
+		lava-test-case $* --result pass
+		return
+	fi
 	if [ $result -eq 127 ];then
 		#echo "<LAVA_SIGNAL_TESTCASE $* RESULT=SKIP>"
 		lava-test-case $* --result skip
-		return
-	fi
-	if [ "$result" == 'PASS' -o "$result" == 'pass' ];then
-		lava-test-case $* --result pass
 		return
 	fi
 	if [ $result -eq 0 ];then
