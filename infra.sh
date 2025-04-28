@@ -45,6 +45,18 @@ result $? "dns"
 
 TEST_PREFIX="infra"
 
+if [ -e /sys/bus/usb ];then
+	start_test "Test lsusb"
+	lsusb
+	result $? "lsusb"
+fi
+
+if [ -e /sys/bus/pci ];then
+	start_test "Test lspci"
+	lspci
+	result $? "lspci"
+fi
+
 start_test "Run sensors"
 sensors
 result $? "sensors"
