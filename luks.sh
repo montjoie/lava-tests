@@ -137,7 +137,7 @@ fi
 echo 'toto' >"$OUTPUT_DIR/fake.key"
 
 start_test "$PREFIX crytpsetup format with $CREATE_OPTS"
-cryptsetup --verbose --key-file="$OUTPUT_DIR/fake.key" "$CREATE_OPTS" --batch-mode luksFormat "$OUTPUT_DIR/fake.img"
+cryptsetup --verbose --key-file="$OUTPUT_DIR/fake.key" $CREATE_OPTS --batch-mode luksFormat "$OUTPUT_DIR/fake.img"
 RET=$?
 result $RET "test-$TNAME-format-img"
 if [ $RET -ne 0 ];then
