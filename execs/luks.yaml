@@ -1,0 +1,12 @@
+metadata:
+  name: Montjoie tests
+  format: "Lava-Test-Shell Test Definition 1.0"
+  description: "Montjoie test"
+  version: 1.0
+run:
+  steps:
+    - echo "LUKS tests"
+    - lava-test-set start test-luks
+    - chmod +x ./luks.sh
+    - ./luks.sh
+    - lava-test-set stop test-luks
