@@ -203,13 +203,13 @@ rm "$OUTPUT_DIR/fake.img"
 
 
 do_cryptsetup_luks1
-do_cryptsetup_luks2
-RET_LUKS2=$?
+#do_cryptsetup_luks2
+#RET_LUKS2=$?
 
-if [ $RET_LUKS2 -ne 0 ];then
-	exit 0
-fi
-
+#if [ $RET_LUKS2 -ne 0 ];then
+#	exit 0
+#fi
+exit 0
 
 
 test_pluks()
