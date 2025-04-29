@@ -63,9 +63,17 @@ result $? "sensors"
 
 #start_test "dmesg logs"
 for level in warn err; do
+	start_test "Check dmesg $level"
+	ret=0
 	dmesg --level=$level --notime -x -k > dmesg.$level
+	if [ -s dmesg.$level ];then
+		ret=1
+	fi
+	result $ret "dmesg-$level"
 done
 for level in crit alert emerg; do
+	start_test "Check dmesg $level"
+	ret=0
 	dmesg --level=$level --notime -x -k > dmesg.$level
 	test -s dmesg.$level && res=fail || res=pass
 	count=$(cat dmesg.$level | wc -l)
@@ -73,6 +81,11 @@ for level in crit alert emerg; do
 		--result $res \
 		--measurement $count \
 		--units lines
+	if [ -s dmesg.$level ];then
+		ret=1
+	fi
+	result $ret "dmesg-$level"
 done
+
 
 cat dmesg.emerg dmesg.alert dmesg.crit dmesg.err dmesg.warn
