@@ -24,7 +24,7 @@ while read -r nvmemfile
 do
 	NAME=$(echo "$nvmemfile" | sed 's,/nvmem$,,' | sed 's,.*/,,')
 	start_test "Dump NVMEM $NAME"
-	grep -qE 'QEMU-sparc64'  $OUTPUT_DIR/machinemodel
+	grep -qE 'QEMU-sparc64|EPBX100'  $OUTPUT_DIR/machinemodel
 	RET=$?
 	if [ $RET -eq 0 ];then
 		echo "DEBUG: skip due to qemu crash"
@@ -36,4 +36,10 @@ do
 	# TODO sunxi-sid test of first values
 done
 
-# TODO decode-dimms
+start_test "decode-dimms"
+if [ "$IHAVE_EEPROM" = 'yes' ];then
+	decode-dimms
+	result $? decode-dimms
+else
+	result skip decode-dimms
+fi

@@ -117,7 +117,7 @@ is_network_v4_ok() {
 
 get_machine_model() {
 	GET_MMODEL_DT=0
-	echo "DEBUG: get_machine_model"
+	echo "DEBUG: get_machine_model on $(uname -m)"
 	if [ -e /sys/firmware/devicetree/base/compatible ];then
 		cat /sys/firmware/devicetree/base/compatible | tr '\0' '\n' > $OUTPUT_DIR/devicetree
 		echo "DEBUG: from devicetree got $(cat /sys/firmware/devicetree/base/compatible)"
@@ -136,12 +136,19 @@ get_machine_model() {
 			if [ $? -eq 0 ];then
 				echo "QEMU-$(uname -m)" > $OUTPUT_DIR/machinemodel
 				if [ -s $OUTPUT_DIR/devicetree ];then
-					echo "QEMU-$(uname -m)-$(cat $OUTPUT_DIR/devicetree)" > $OUTPUT_DIR/machinemodel
+					echo "QEMU-$(uname -m)-$(head -n1 $OUTPUT_DIR/devicetree)" | sed 's, ,_,g' | sed 's,\n,,g' > $OUTPUT_DIR/machinemodel
 				fi
 			else
-				echo "machine_model_unknow" > $OUTPUT_DIR/machinemodel
-				if [ $GET_MMODEL_DT -eq 1 ];then
-					head -n1 $OUTPUT_DIR/devicetree > $OUTPUT_DIR/machinemodel
+				# another last try
+				grep -qi qemu /proc/cpuinfo
+				if [ $? -eq 0 ];then
+					echo "DEBUG: qemu machine fromcpuinfo"
+					echo "QEMU-$(uname -m)" > $OUTPUT_DIR/machinemodel
+				else
+					echo "machine_model_unknow" > $OUTPUT_DIR/machinemodel
+					if [ $GET_MMODEL_DT -eq 1 ];then
+						head -n1 $OUTPUT_DIR/devicetree > $OUTPUT_DIR/machinemodel
+					fi
 				fi
 			fi
 		else
@@ -150,8 +157,18 @@ get_machine_model() {
 	else
 		echo "DEBUG: got machinemodel from MM"
 	fi
+	# hack I have only qemu m68k
+	if [ "$(uname -m)" = 'm68k' ];then
+		echo "QEMU-m68k" > $OUTPUT_DIR/machinemodel
+	fi
+	IHAVE_HWCLOCK=yes
+	IHAVE_EEPROM=yes
 	MACHINE_MODEL=$(cat $OUTPUT_DIR/machinemodel)
 	MACHINE_MODEL_=$(cat $OUTPUT_DIR/machinemodel | sed 's,[[:space:]],_,g' | sed 's,/,_,g')
+	echo $MACHINE_MODEL |grep -q K10N78
+	if [ $? -eq 0 ];then
+		MACHINE_MODEL='K10N78'
+	fi
 	echo "===MACHINEMODEL==="
 	echo $MACHINE_MODEL_
 	echo "===MACHINEMODEL_END==="
@@ -159,39 +176,39 @@ get_machine_model() {
 	if [ $? -eq 0 ];then
 		SOC=H6
 	fi
-	grep -qE 'sun8i-h2-plus' /sys/firmware/devicetree/base/compatible
+	grep -qE 'sun8i-h2-plus' /sys/firmware/devicetree/base/compatible 2>/dev/null
 	if [ $? -eq 0 ];then
 		SOC=H2plus
 	fi
-	grep -qE 'rk3328' /sys/firmware/devicetree/base/compatible
+	grep -qE 'rk3328' /sys/firmware/devicetree/base/compatible 2>/dev/null
 	if [ $? -eq 0 ];then
 		SOC=rk3328
 	fi
-	grep -qE 'rk3588' /sys/firmware/devicetree/base/compatible
+	grep -qE 'rk3588' /sys/firmware/devicetree/base/compatible 2>/dev/null
 	if [ $? -eq 0 ];then
 		SOC=rk3588
 	fi
-	grep -qE 'sun50i-h5' /sys/firmware/devicetree/base/compatible
+	grep -qE 'sun50i-h5' /sys/firmware/devicetree/base/compatible 2>/dev/null
 	if [ $? -eq 0 ];then
 		SOC=H5
 	fi
-	grep -qE 'sun50i-h6' /sys/firmware/devicetree/base/compatible
+	grep -qE 'sun50i-h6' /sys/firmware/devicetree/base/compatible 2>/dev/null
 	if [ $? -eq 0 ];then
 		SOC=H6
 	fi
-	grep -qE 's805x' /sys/firmware/devicetree/base/compatible
+	grep -qE 's805x' /sys/firmware/devicetree/base/compatible 2>/dev/null
 	if [ $? -eq 0 ];then
 		SOC=s805x
 	fi
-	grep -qE 's905x' /sys/firmware/devicetree/base/compatible
+	grep -qE 's905x' /sys/firmware/devicetree/base/compatible 2>/dev/null
 	if [ $? -eq 0 ];then
 		SOC=s905x
 	fi
-	grep -qE 'g12a|sei510' /sys/firmware/devicetree/base/compatible
+	grep -qE 'g12a|sei510' /sys/firmware/devicetree/base/compatible 2>/dev/null
 	if [ $? -eq 0 ];then
 		SOC=g12a
 	fi
-	grep -qE 'g12b|ODROID-N2' /sys/firmware/devicetree/base/compatible
+	grep -qE 'g12b|ODROID-N2' /sys/firmware/devicetree/base/compatible 2>/dev/null
 	if [ $? -eq 0 ];then
 		SOC=g12b
 	fi
@@ -226,6 +243,103 @@ get_machine_model() {
 	grep -qiE 'gxm|vim2' /sys/firmware/devicetree/base/compatible
 	if [ $? -eq 0 ];then
 		SOC=gxm
+	fi
+	echo $MACHINE_MODEL_ |grep -qi qemu
+	if [ $? -eq 0 ];then
+		echo "DEBUG: check some qemu name hacks on $(uname -m)"
+		if [ "$(uname -m)" = 'x86_64' ];then
+			MACHINE_MODEL_="qemu-x86_64"
+		fi
+		if [ "$(uname -m)" = 'i686' ];then
+			echo "DEBUG: qemu is i686"
+			MACHINE_MODEL_="qemu-i686"
+		fi
+		lspci |grep -q '82576 Gigabit Network'
+		if [ $? -eq 0 ];then
+			MACHINE_MODEL_="qemu-x86_64-igb"
+		fi
+	fi
+	echo $MACHINE_MODEL_ |grep -qi dummy-virt
+	if [ $? -eq 0 ];then
+		if [ "$(uname -m)" = 'armv7l' ];then
+			MACHINE_MODEL_="qemu-arm-virt"
+			IHAVE_SENSORS=no
+			INEED_BLK="/dev/vda"
+		fi
+		if [ "$(uname -m)" = 'aarch64' ];then
+			MACHINE_MODEL_="qemu-arm64-virt"
+			IHAVE_SENSORS=no
+			INEED_BLK="/dev/vda"
+		fi
+	fi
+
+	echo $MACHINE_MODEL_ | grep -qiE 'NVIDIA_Tegra124_Jetson_TK1'
+	if [ $? -eq 0 ];then
+		SOC=tegra124
+		IHAVE_USB=yes
+		IHAVE_SPI=yes
+		IHAVE_PCI=yes
+		IHAVE_NET=yes
+		INEED_BLK="/dev/mmcblk1 /dev/sda"
+	fi
+	echo $MACHINE_MODEL_ | grep -qiE 'u200'
+	if [ $? -eq 0 ];then
+		IHAVE_USB=yes
+		IHAVE_SPI=yes
+		IHAVE_NET=yes
+		INEED_BLK="/dev/mmcblk1"
+		IHAVE_SENSORS=yes
+	fi
+	IHAVE_SENSORS=yes
+	echo $MACHINE_MODEL_ | grep -qiE 'qemu'
+	if [ $? -eq 0 ];then
+		IHAVE_USB=yes
+		IHAVE_PCI=yes
+		IHAVE_NET=yes
+		INEED_BLK="/dev/sda"
+		IHAVE_SENSORS=no
+	fi
+	echo $MACHINE_MODEL_ | grep -qiE 'riscv-virtio,qemu'
+	if [ $? -eq 0 ];then
+		INEED_BLK="/dev/vda"
+	fi
+	echo $MACHINE_MODEL_ | grep -qiE 'PowerMac_G3'
+	if [ $? -eq 0 ];then
+		IHAVE_USB=no
+	fi
+	echo $MACHINE_MODEL_ | grep -qiE 'QEMU-sparc64-sun4u'
+	if [ $? -eq 0 ];then
+		echo "DEBUG: QEMU-sparc64-sun4u hacks, no USB"
+		IHAVE_USB=no
+	fi
+	echo $MACHINE_MODEL_ | grep -qiE 'QEMU-mips-mti,malta'
+	if [ $? -eq 0 ];then
+		IHAVE_EEPROM=no
+	fi
+	echo $MACHINE_MODEL_ | grep -qiE 'QEMU-ppc64-qemu,pserie'
+	if [ $? -eq 0 ];then
+		IHAVE_HWCLOCK=no
+		IHAVE_EEPROM=no
+	fi
+	echo $MACHINE_MODEL_ | grep -qiE 'QEMU-m68k'
+	if [ $? -eq 0 ];then
+		IHAVE_HWCLOCK=no
+		IHAVE_EEPROM=no
+	fi
+	echo $MACHINE_MODEL_ | grep -qiE 'Allwinner_D1_Nezha'
+	if [ $? -eq 0 ];then
+		echo "DEBUG: check MAC address"
+		ip a | grep -q '86:de:92:ff:40:bd'
+		if [ $? -ne 0 ];then
+			echo "DEBUG: stop eth0"
+			ip link set dev eth0 down
+			echo "DEBUG: fix MAC address on Allwinner_D1_Nezha"
+			ip link set dev eth0 address 8a:c9:56:36:00:82
+			echo "DEBUG: start eth0"
+			ip link set dev eth0 up
+			echo "DEBUG: start dhcp"
+			udhcpc -i eth0 -q -f -n
+		fi
 	fi
 }
 

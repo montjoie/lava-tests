@@ -7,8 +7,12 @@ date
 result $? "RTC-date"
 
 start_test "Run hwclock"
-hwclock
-result $? "RTC-hwclock"
+if [ "$IHAVE_HWCLOCK" = 'yes' ];then
+	hwclock
+	result $? "RTC-hwclock"
+else
+	result skip "RTC-hwclock"
+fi
 
 start_test "Check dmesg logs"
 dmesg |grep -i rtc

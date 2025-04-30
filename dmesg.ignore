@@ -1,1 +1,5 @@
-musb-sunxi: probe of 1c19000.usb failed with error -22
+kern  :warn  :  OK
+kern  :warn  : , OK
+kern  :warn  :  ., OK
+ext4 filesystem being mounted at /mnt/luks supports timestamps until 2038-01-19
+uses obsolete ecb\(arc4\) skcipher

@@ -58,6 +58,24 @@ done < /proc/crypto
 
 print_crypto_stat
 
+if [ -e /lib/modules ];then
+	# try to load all crypto modules
+	find /lib/modules -type f |grep crypto | sed 's,.*/,,' > /tmp/crypto.list
+	while read -r crypto_module
+	do
+		start_test "Load crypto $crypto_module"
+		modprobe "$crypto_module" |tee modprobe.out 2>&1
+		RET=$?
+		grep -q 'No such device' modprobe.out
+		if [ $? -eq 0 ];then
+			RET=0
+		fi
+		result $? "${TEST_PREFIX}load-$crypto_module"
+	done < /tmp/crypto.list
+else
+	result SKIP "crypto-load-all-modules"
+fi
+
 # for all crypto algorithm to load by testing them via the tcrypt module
 start_test "Test kernel crypto via the tcrypt module"
 #modprobe tcrypt 2> $OUTPUT_DIR/tcrypt.err
@@ -146,7 +164,7 @@ test_hwrng
 # check for some result
 # tcrypt generate error -2 for non-present algs
 start_test "Verify crypto errors"
-dmesg | grep -vE 'is unavailable$|[[:space:]]-2$|This is intended for developer use only|alg: No test for stdrng|alg: No test for ffdhe' |grep alg:
+dmesg | grep -vE 'is unavailable$|[[:space:]]-2$|This is intended for developer use only|alg: No test for stdrng|alg: No test for ffdhe|No test for 842' |grep alg:
 RET=$?
 if [ $RET -eq 0 ];then
 	result 1 "crypto-error-log"
