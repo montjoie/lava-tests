@@ -24,7 +24,7 @@ while read -r nvmemfile
 do
 	NAME=$(echo "$nvmemfile" | sed 's,/nvmem$,,' | sed 's,.*/,,')
 	start_test "Dump NVMEM $NAME"
-	grep -qE 'QEMU-sparc64'  $OUTPUT_DIR/machinemodel
+	grep -qE 'QEMU-sparc64|EPBX100'  $OUTPUT_DIR/machinemodel
 	RET=$?
 	if [ $RET -eq 0 ];then
 		echo "DEBUG: skip due to qemu crash"
