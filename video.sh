@@ -11,9 +11,13 @@ drm_test() {
 # test /dev/videoX
 test_dev_video() {
 	echo "DEBUG: TODO $1"
+	start_test "Check compliance $1"
+	v4l2-compliance -d $1
+	result $? "test-v4l-compliance-video-$2"
+
 	start_test "Dump an image from $1"
 	ffmpeg -i $1 -f null -frames 1 $OUTPUT_DIR/video$2
-	result $? "test-v4l-dump-$1"
+	result $? "test-v4l-dump-video-$2"
 }
 
 #try to load all USB modules
@@ -50,7 +54,7 @@ start_test "List all V4L devices"
 v4l2-ctl --list-devices -D -l -L
 result $? "test-v4l-list"
 
-for i in $(seq 1 20)
+for i in $(seq 0 20)
 do
 	if [ -e /dev/video$i ];then
 		test_dev_video /dev/video$i $i
