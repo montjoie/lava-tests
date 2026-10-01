@@ -362,6 +362,12 @@ do
 		echo "SKIP: dont check $iface"
 		continue
 	fi
+	# skip CAN interface
+	echo $iface |grep -q 'can[0-9]'
+	if [ $? -eq 0 ];then
+		echo "SKIP: dont check $iface"
+		continue
+	fi
 	test_interface "$iface"
 done
 
