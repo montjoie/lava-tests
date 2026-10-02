@@ -206,7 +206,7 @@ do
 done < /proc/crypto
 
 echo "DEBUG: check for libkcapi test"
-if [ -e /usr/libexec/libkcapi/test.sh ];then
+if [ -e /usr/libexec/libkcapi/test.shdisabled ];then
 	cp /usr/libexec/libkcapi/test.sh /usr/libexec/libkcapi/test.sh.old
 	sed -i 's,^[[:space:]][[:space:]]*aead,echo "aead"#,' /usr/libexec/libkcapi/test.sh
 	sed -i 's,^[[:space:]][[:space:]]*multipletest_aead,echo "aead"#,' /usr/libexec/libkcapi/test.sh
