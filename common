@@ -272,6 +272,10 @@ get_machine_model() {
 			INEED_BLK="/dev/vda"
 		fi
 	fi
+	echo "$MACHINE_MODEL_" |grep -qi AMD_Versal_Virtual
+	if [ $? -eq 0 ];then
+		IHAVE_SENSORS=no
+	fi
 
 	echo $MACHINE_MODEL_ | grep -qiE 'NVIDIA_Tegra124_Jetson_TK1'
 	if [ $? -eq 0 ];then
