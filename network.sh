@@ -80,6 +80,8 @@ start_test "Test external network"
 ping -c4 8.8.8.8
 result $? "external-network"
 
+echo "=== content of /etc/resolv.conf ==="
+cat /etc/resolv.conf
 start_test "Test DNS"
 ping -c4 dns.google.com
 result $? "dns"
