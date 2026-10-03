@@ -1,0 +1,11 @@
+Cubietech_Cubieboard_mtu_1600
+Cubietech_Cubieboard_link_10baseT_half
+Cubietech_Cubieboard_link_10baseT_full
+Cubietech_Cubieboard_link_100baseT_half
+Cubietech_Cubieboard_link_100baseT_full
+Xunlong_Orange_Pi_PC_mtu_500
+riscv-virtio,qemu_mtu_500
+riscv-virtio,qemu_mtu_1000
+riscv-virtio,qemu_mtu_1200
+riscv-virtio,qemu_mtu_1400
+riscv-virtio,qemu_mtu_1600
