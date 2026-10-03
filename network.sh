@@ -175,6 +175,12 @@ test_interface() {
 			echo "DEBUG: skip $mtu as same as old MTU"
 			continue
 		fi
+		echo "DEBUG: check ${MACHINE_MODEL_} can mtu ${mtu}"
+		grep -q "${MACHINE_MODEL_}_mtu_${mtu}" network.skip
+		if [ $? -eq 0 ];then
+			echo "DEBUG: skip $mtu not working on ${MACHINE_MODEL_}"
+			continue
+		fi
 		start_test "down $netdev for changing MTU"
 		ip link set $netdev down
 		result $? "network-$netdev-mtu-$mtu-down"
@@ -302,6 +308,12 @@ test_interface() {
 				continue
 			fi
 
+		fi
+		echo "DEBUG: check ${MACHINE_MODEL_} can link ${SPEED} ${DUPLEX}"
+		grep -q "${MACHINE_MODEL_}_link_${SPEED}_${DUPLEX}" network.skip
+		if [ $? -eq 0 ];then
+			echo "DEBUG: skip ${SPEED} ${DUPLEX} not working on ${MACHINE_MODEL_}"
+			continue
 		fi
 		echo "DEBUG: TEST $SPEED $DUPLEX"
 		kci_netdev_ethtool_test 666 "change-speed-to-$ethmode" "ethtool -s $netdev speed $SPEED duplex $DUPLEX" "$netdev"

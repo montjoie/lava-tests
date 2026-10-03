@@ -1,0 +1,16 @@
+Cubietech_Cubieboard_mtu_1200
+Cubietech_Cubieboard_mtu_1600
+Cubietech_Cubieboard_link_10_half
+Cubietech_Cubieboard_link_10_full
+Cubietech_Cubieboard_link_100_half
+Cubietech_Cubieboard_link_100_full
+Xunlong_Orange_Pi_PC_mtu_500
+Xunlong_Orange_Pi_PC_mtu_1200
+qemu-arm-virt_mtu_1400
+riscv-virtio,qemu_mtu_500
+riscv-virtio,qemu_mtu_1000
+riscv-virtio,qemu_mtu_1200
+riscv-virtio,qemu_mtu_1400
+riscv-virtio,qemu_mtu_1600
+Olimex_A33-OLinuXino_mtu_500
+Olimex_A33-OLinuXino_mtu_1600
