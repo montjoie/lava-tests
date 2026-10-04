@@ -72,6 +72,13 @@ mv cacert.crt /etc/ipsec.d/cacerts/ || exit $?
 mv ipsec.conf /etc/ || exit $?
 mv ipsec.secrets /etc/ || exit $?
 
+
+ip a |grep -q 192.168.66
+if [ $? -eq 0 ];then
+	echo "DEBUG: IPSEC not handled yet for qemu machines"
+	exit 0
+fi
+
 start_test "IPSEC: start"
 ipsec start
 result $? "ipsec-start"
