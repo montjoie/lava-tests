@@ -143,7 +143,14 @@ test_interface() {
 	result $? "network-$netdev-ethtool-features-list"
 
 	kci_netdev_ethtool_test 74 'selftest_offline' "ethtool --test $netdev offline" "$netdev"
+	echo "DEBUG: check ${MACHINE_MODEL_} can selftest online"
+	grep -q "${MACHINE_MODEL_}_selftest_online" network.skip
+	if [ $? -eq 0 ];then
+		echo "DEBUG: skip selftest online not working on ${MACHINE_MODEL_}"
+		result SKIP network-${netdev}-ethtool-selftest_online
+	else
 	kci_netdev_ethtool_test 74 'selftest_online' "ethtool --test $netdev online" "$netdev"
+	fi
 	kci_netdev_ethtool_test 74 'dump' "ethtool -d $netdev" "$netdev"
 	kci_netdev_ethtool_test 94 'stats' "ethtool -S $netdev" "$netdev"
 
@@ -180,6 +187,10 @@ test_interface() {
 		grep -q "${MACHINE_MODEL_}_mtu_${mtu}" network.skip
 		if [ $? -eq 0 ];then
 			echo "DEBUG: skip $mtu not working on ${MACHINE_MODEL_}"
+			result SKIP network-${netdev}-mtu-${mtu}-down
+			result SKIP network-${netdev}-mtu-${mtu}-up
+			result SKIP network-${netdev}-mtu-${mtu}-ip
+			result SKIP network-${netdev}-mtu-${mtu}-ping
 			continue
 		fi
 		start_test "down $netdev for changing MTU"

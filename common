@@ -330,6 +330,17 @@ get_machine_model() {
 		IHAVE_HWCLOCK=no
 		IHAVE_EEPROM=no
 	fi
+	if [ "$MACHINE_MODEL_" == 'Xunlong_Orange_Pi_PC' ];then
+		echo "DEBUG: check that $MACHINE_MODEL_ is a real one"
+		# detect MMC is real
+		dmesg |grep -iq qemu
+		if [ $? -eq 0 ];then
+			echo "DEBUG: Qemu $MACHINE_MODEL_"
+			MACHINE_MODEL_="Qemu_$MACHINE_MODEL_"
+		else
+			echo "DEBUG: Real $MACHINE_MODEL_"
+		fi
+	fi
 	echo $MACHINE_MODEL_ | grep -qiE 'Allwinner_D1_Nezha'
 	if [ $? -eq 0 ];then
 		echo "DEBUG: check MAC address"
