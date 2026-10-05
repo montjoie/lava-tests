@@ -4,3 +4,9 @@ kern  :warn  :  ., OK
 ext4 filesystem being mounted at /mnt/luks supports timestamps until 2038-01-19
 uses obsolete ecb\(arc4\) skcipher
 KASLR disabled due to lack of seed
+dwc3-xilinx ff9d0000.usb: error -ENOENT: failed to get reset signal
+dwc3-xilinx ff9d0000.usb: probe with driver dwc3-xilinx failed with error -2
+macb ff0c0000.ethernet: GEM doesn't support hardware ptp.
+macb ff0d0000.ethernet: GEM doesn't support hardware ptp.
+xilinx_can ff070000.canfd can0: bit-timing not yet defined
+xilinx_can ff060000.canfd can1: bit-timing not yet defined

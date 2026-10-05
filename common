@@ -163,6 +163,7 @@ get_machine_model() {
 	fi
 	IHAVE_HWCLOCK=yes
 	IHAVE_EEPROM=yes
+	IHAVE_SENSORS=yes
 	MACHINE_MODEL=$(cat $OUTPUT_DIR/machinemodel)
 	MACHINE_MODEL_=$(cat $OUTPUT_DIR/machinemodel | sed 's,[[:space:]],_,g' | sed 's,/,_,g')
 	echo $MACHINE_MODEL |grep -q K10N78
@@ -294,7 +295,6 @@ get_machine_model() {
 		INEED_BLK="/dev/mmcblk1"
 		IHAVE_SENSORS=yes
 	fi
-	IHAVE_SENSORS=yes
 	echo $MACHINE_MODEL_ | grep -qiE 'qemu'
 	if [ $? -eq 0 ];then
 		IHAVE_USB=yes
