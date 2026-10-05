@@ -142,7 +142,8 @@ test_interface() {
 	ethtool -k "$netdev"
 	result $? "network-$netdev-ethtool-features-list"
 
-	kci_netdev_ethtool_test 74 'selftest' "ethtool --test $netdev online" "$netdev"
+	kci_netdev_ethtool_test 74 'selftest_offline' "ethtool --test $netdev offline" "$netdev"
+	kci_netdev_ethtool_test 74 'selftest_online' "ethtool --test $netdev online" "$netdev"
 	kci_netdev_ethtool_test 74 'dump' "ethtool -d $netdev" "$netdev"
 	kci_netdev_ethtool_test 94 'stats' "ethtool -S $netdev" "$netdev"
 
